@@ -26,5 +26,10 @@ namespace AdventOfCode
         {
             return from intStr in input.Split(delimeter) select int.Parse(intStr);
         }
+
+        public static IEnumerable<IEnumerable<int>> ReadZeroToNineGrid(string input)
+        {
+            return from line in input.TrimEnd().SplitLines() select (from c in line.ToCharArray() select (int)(c - '0'));
+        }
     }
 }
