@@ -45,7 +45,7 @@ namespace AdventOfCode
             return data[x, y];
         }
 
-        public IEnumerable<T> Neighbors(int x, int y, bool includeDiagonal)
+        public IEnumerable<T> AllNeighbors(int x, int y, bool includeDiagonal)
         {
             yield return GetValue(x - 1, y);
             yield return GetValue(x + 1, y);
@@ -60,6 +60,43 @@ namespace AdventOfCode
                 yield return GetValue(x + 1, y + 1);
             }
         }
+
+        public IEnumerable<T> ValidNeighbors(int x, int y, bool includeDiagonal)
+        {
+            if (x > 0)
+                yield return GetValue(x - 1, y);
+
+            if (x < (Width - 1))
+            yield return GetValue(x + 1, y);
+
+            if (y > 0)
+                yield return GetValue(x, y - 1);
+
+            if (y < (Height - 1))
+            yield return GetValue(x, y + 1);
+
+            if (includeDiagonal)
+            {
+                if (x > 0)
+                {
+                    if (y > 0)
+                        yield return GetValue(x - 1, y - 1);
+
+                    if (y < (Height - 1))
+                        yield return GetValue(x - 1, y + 1);
+                }
+
+                if (x < (Width - 1))
+                {
+                    if (y > 0)
+                        yield return GetValue(x + 1, y - 1);
+
+                    if (y < (Height - 1))
+                        yield return GetValue(x + 1, y + 1);
+                }
+            }
+        }
+
 
         public Grid<T> CreateData(int width, int height)
         {
