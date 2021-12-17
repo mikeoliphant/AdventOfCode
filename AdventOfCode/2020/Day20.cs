@@ -46,11 +46,10 @@ namespace AdventOfCode._2020
         }
     }
 
-    public class TileGrid : Grid<int>
+    public class TileGrid : Grid<TilePos>
     {
         public TileGrid()
         {
-            InvalidValue = -1;
         }
     }
 
@@ -74,6 +73,7 @@ namespace AdventOfCode._2020
     {
         Dictionary<int, Tile> tiles = new Dictionary<int, Tile>();
         int tileSize;
+        TileGrid tileGrid;
 
         void ReadInput()
         {
@@ -213,6 +213,12 @@ namespace AdventOfCode._2020
                     break;
                 }
             }
+
+
+
+            tileGrid = new TileGrid().CreateData(tileSize, tileSize) as TileGrid;
+
+            tileGrid[0, 0] = upperLeft;
 
             return 0;
         }
