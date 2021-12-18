@@ -22,9 +22,14 @@ namespace AdventOfCode
             return from intStr in input.Split(delimeter) select int.Parse(intStr);
         }
 
+        public static IEnumerable<int> ToInts(this IEnumerable<string> input)
+        {
+            return from intStr in input select int.Parse(intStr);
+        }
+
         public static IEnumerable<int> ToInts(this string input, string delimeter)
         {
-            return from intStr in input.Split(delimeter) select int.Parse(intStr);
+            return input.Split(delimeter).ToInts();
         }
 
         public static IEnumerable<IEnumerable<int>> ReadZeroToNineGrid(string input)
