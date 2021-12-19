@@ -10,78 +10,156 @@ namespace AdventOfCode._2020
     {
         internal class CircleList
         {
-            public List<int> list;
-            int currentValue = 0;
+            LinkedListNode<int>[] nodeArray;
+            LinkedList<int> list;
+            LinkedListNode<int> currentNode;
+
+            int minVal;
+            int maxVal;           
 
             public CircleList(List<int> startValues)
             {
-                list = new List<int>(startValues);
+                list = new LinkedList<int>(startValues);
 
-                currentValue = list[0];
+                currentNode = list.First;
+
+                minVal = list.Min();
+                maxVal = list.Max();
+
+                nodeArray = new LinkedListNode<int>[list.Count];
+
+                int pos = 0;
+
+                LinkedListNode<int> node = list.First;
+
+                do
+                {
+                    nodeArray[node.Value - 1] = node;
+
+                    node = node.Next;
+                }
+                while (node != null);
             }
+
+            public int Count { get { return list.Count; } }
 
             public List<int> RemoveClockwise(int numToRemove)
             {
                 List<int> toReturn = new List<int>();
 
-                int currentPosition = list.IndexOf(currentValue);
-
                 for (int i = 0; i < numToRemove; i++)
                 {
-                    int removePos = (currentPosition + 1) % list.Count;
+                    if (currentNode.Next == null)
+                    {
+                        toReturn.Add(list.First.Value);
 
-                    toReturn.Add(list[removePos]);
-                    list.RemoveAt(removePos);
+                        list.RemoveFirst();
+                    }
+                    else
+                    {
+                        toReturn.Add(currentNode.Next.Value);
+                        list.Remove(currentNode.Next);
+                    }
                 }
 
                 return toReturn;
             }
 
+            LinkedListNode<int> lastDest = null;
+
             public void InsertAtDestination(List<int> toInsert)
             {
-                int value = currentValue - 1;
+                int value = currentNode.Value - 1;
 
-                int minValue = list.Min();                
-
-                while (!list.Contains(value))
+                if (value < minVal)
                 {
-                    if (value < minValue)
-                    {
-                        value = list.Max();
-                        break;
-                    }
-
-                    value--;
+                    value = maxVal;
                 }
 
-                int destination = list.IndexOf(value);
+                while (toInsert.Contains(value))
+                {
+                    value--;
 
-                list.InsertRange(destination + 1, toInsert);
+                    if (value < minVal)
+                    {
+                        value = maxVal;
+                    }
+                }
+
+                LinkedListNode<int> destinationNode = nodeArray[value - 1];
+
+                lastDest = destinationNode;
+
+                for (int i = toInsert.Count - 1; i >= 0; i--)
+                    list.AddAfter(destinationNode, nodeArray[toInsert[i] - 1]);
+            }
+
+            public void SetCurrentValue(int val)
+            {
+                currentNode = nodeArray[val - 1];
             }
 
             public void IncrementCurrent()
             {
-                currentValue = list[(list.IndexOf(currentValue) + 1) % list.Count];
+                if (currentNode == list.Last)
+                    currentNode = list.First;
+                else
+                    currentNode = currentNode.Next;
             }
 
             public override string ToString()
             {
-                return String.Join(',', list);
+                return String.Join(',', from num in list select (num == currentNode.Value) ? "(" + num + ")" : num.ToString());
             }
         }
 
         public long Compute()
         {
-            CircleList circle = new CircleList(new List<int> { 3, 8, 9, 1, 2, 5, 4, 6, 7 });
+            //CircleList circle = new CircleList(new List<int> { 3, 8, 9, 1, 2, 5, 4, 6, 7 });
+            CircleList circle = new CircleList(new List<int> { 6, 2, 4, 3, 9, 7, 1, 5, 8 });
 
-            for (int move = 0; move < 10; move++)
+
+            for (int move = 0; move < 100; move++)
             {
                 List<int> removed = circle.RemoveClockwise(3);
                 circle.InsertAtDestination(removed);
                 circle.IncrementCurrent();
             }
 
-            return 0;
+            circle.SetCurrentValue(1);
+            List<int> rest = circle.RemoveClockwise(circle.Count - 1);
+
+            long result = long.Parse(String.Join("", rest));
+
+            return result;
+        }
+
+        public long Compute2()
+        {
+            //CircleList circle = new CircleList(new List<int> { 3, 8, 9, 1, 2, 5, 4, 6, 7 });
+            //CircleList circle = new CircleList(new List<int> { 6, 2, 4, 3, 9, 7, 1, 5, 8 });
+
+            //List<int> nums = new List<int> { 3, 8, 9, 1, 2, 5, 4, 6, 7 };
+            List<int> nums = new List<int> { 6, 2, 4, 3, 9, 7, 1, 5, 8 };
+
+            for (int i = 10; i <= 1000000; i++)
+                nums.Add(i);
+
+            CircleList circle = new CircleList(nums);
+
+            for (int move = 0; move < 10000000; move++)
+            {
+                List<int> removed = circle.RemoveClockwise(3);
+                circle.InsertAtDestination(removed);
+                circle.IncrementCurrent();
+            }
+
+            circle.SetCurrentValue(1);
+            List<int> starCups = circle.RemoveClockwise(2);
+
+            long result = (long)starCups[0] * (long)starCups[1];
+
+            return result;
         }
     }
 }
