@@ -32,6 +32,16 @@ namespace AdventOfCode
             return input.Split(delimeter).ToInts();
         }
 
+        public static IEnumerable<float> ToFloats(this IEnumerable<string> input)
+        {
+            return from floatStr in input select float.Parse(floatStr);
+        }
+
+        public static IEnumerable<float> ToFloats(this string input, string delimeter)
+        {
+            return input.Split(delimeter).ToFloats();
+        }
+
         public static IEnumerable<IEnumerable<int>> ReadZeroToNineGrid(string input)
         {
             return from line in input.TrimEnd().SplitLines() select (from c in line.ToCharArray() select (int)(c - '0'));

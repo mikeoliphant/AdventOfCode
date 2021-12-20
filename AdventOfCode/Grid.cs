@@ -45,6 +45,61 @@ namespace AdventOfCode
             return data[x, y];
         }
 
+        public void SetValue(int x, int y, T value)
+        {
+            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
+                return;
+
+            data[x, y] = value;
+        }
+
+        public static void Copy(Grid<T> src, Grid<T> dest, int destX, int destY)
+        {
+            for (int x = 0; x < src.Width; x++)
+            {
+                for (int y = 0; y < src.Height; y++)
+                {
+                    dest.SetValue(destX + x, destY + y, src[x, y]);
+                }
+            }
+        }
+
+        public void Fill(T value)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    data[x, y] = value;
+                }
+            }
+        }
+
+        public IEnumerable<T> GetAllValues()
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    yield return data[x, y];
+                }
+            }
+        }
+
+        public IEnumerable<T> GetWindow(int x, int y, int size, bool includeSelf)
+        {
+            for (int dy = -size; dy <= size; dy++)
+            {
+                for (int dx = -size; dx <= size; dx++)
+                {
+                    if (includeSelf || (dx != 0 && dy != 0))
+                    {
+                        yield return GetValue(x + dx, y + dy);
+                    }
+                }
+            }
+        }
+
         public IEnumerable<T> AllNeighbors(int x, int y, bool includeDiagonal)
         {
             yield return GetValue(x - 1, y);
