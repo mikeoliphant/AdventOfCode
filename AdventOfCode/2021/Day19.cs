@@ -14,7 +14,7 @@ namespace AdventOfCode._2021
 
         void ReadInput()
         {
-            string[] scannerData = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2021\Day19Test.txt").SplitParagraphs();
+            string[] scannerData = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2021\Day19.txt").SplitParagraphs();
 
             scannedBeacons = (from scanner in scannerData select (from scan in scanner.SplitLines().Skip(1) select new Vector3(scan.ToFloats(",").ToArray().AsSpan<float>())).ToArray()).ToArray();
 
@@ -80,76 +80,72 @@ namespace AdventOfCode._2021
         {
             ReadInput();
 
-            Vector3[] scan1 = new Vector3[] { new Vector3(-618, -824, -621) };
-            Vector3[] scan2 = new Vector3[] { new Vector3(686, 422, 578) };
+            bool[] haveScanner = new bool[scannedBeacons.Length];
+            Vector3[] scannerLocations = new Vector3[scannedBeacons.Length];
+            scannerLocations[0] = Vector3.Zero;
 
-            Dictionary<int, Vector3> relativeLocations = new Dictionary<int, Vector3>();
-            Dictionary<int, Vector3> absoluteLocations = new Dictionary<int, Vector3>();
-            Dictionary<int, int> relativeTo = new Dictionary<int, int>();
-            Dictionary<int, Matrix4x4> relativeOrientations = new Dictionary<int, Matrix4x4>();
-            Dictionary<int, Matrix4x4> absoluteOrientations = new Dictionary<int, Matrix4x4>();
-
-            relativeLocations[0] = Vector3.Zero;
-            absoluteLocations[0] = Vector3.Zero;
-            relativeOrientations[0] = Matrix4x4.Identity;
-            absoluteOrientations[0] = Matrix4x4.Identity;
-
-            for (int o = 0; o < possibleOrientations.Count; o++)
-            {
-                Vector3 trans = Vector3.Transform(new Vector3(1, 2, 3), possibleOrientations[o]);
-            }
-
-            Vector3 blah = Vector3.Transform(new Vector3(1, 2, 3), possibleOrientations[22]);
+            int scannerCount = 1;
 
             do
             {
-                for (int newScan = 0; newScan < scannedBeacons.Length; newScan++)
+                for (int scanner = 1; scanner < scannedBeacons.Length; scanner++)
                 {
-                    if (!relativeLocations.ContainsKey(newScan))
+                    if (haveScanner[scanner])
+                        continue;
+
+                    for (int orientation = 0; orientation < possibleOrientations.Count; orientation++)
                     {
-                        for (int existingScan = 0; existingScan < scannedBeacons.Length; existingScan++)
+                        Vector3 relativeLocation;
+
+                        if (DetectOverlap(scannedBeacons[0], possibleOrientations[orientation], scannedBeacons[scanner], out relativeLocation))
                         {
-                            if (newScan == existingScan)
-                                continue;
+                            Matrix4x4 invScanner;
 
-                            if (relativeLocations.ContainsKey(existingScan))
+                            Matrix4x4.Invert(possibleOrientations[orientation], out invScanner);
+
+                            List<Vector3> newBeacons = new List<Vector3>();
+
+                            foreach (Vector3 beacon in scannedBeacons[scanner])
                             {
-                                Vector3 relativeLocation = Vector3.Zero;
+                                Vector3 absBeacon = relativeLocation + Round(Vector3.Transform(beacon, invScanner));
 
-                                foreach (Matrix4x4 orientation in possibleOrientations)
+                                if (!scannedBeacons[0].Contains(absBeacon))
                                 {
-                                    if (DetectOverlap(scannedBeacons[existingScan], orientation, scannedBeacons[newScan], out relativeLocation))
-                                    {
-                                        relativeTo[newScan] = existingScan;
-                                        relativeLocations[newScan] = relativeLocation;
-                                        relativeOrientations[newScan] = orientation;
-
-                                        absoluteLocations[newScan] = absoluteLocations[existingScan] + Vector3.Transform(relativeLocations[newScan], relativeOrientations[existingScan]);
-                                        absoluteOrientations[newScan] = relativeOrientations[newScan] * absoluteOrientations[existingScan];
-
-                                        break;
-                                    }
+                                    newBeacons.Add(absBeacon);
                                 }
                             }
+
+                            if ((scannedBeacons[scanner].Length - newBeacons.Count) < 12)
+                            {
+                                //throw new Exception();
+                            }
+
+                            newBeacons.AddRange(scannedBeacons[0]);
+
+                            scannedBeacons[0] = newBeacons.ToArray();
+
+                            scannerLocations[scanner] = relativeLocation;
+                            haveScanner[scanner] = true;
+                            scannerCount++;
+
+                            break;
                         }
                     }
                 }
             }
-            while (absoluteLocations.Count < scannedBeacons.Length);
+            while (scannerCount < scannedBeacons.Length);
 
-            Dictionary<Vector3, bool> beaconLocations = new Dictionary<Vector3, bool>();
+            int maxDist = 0;
 
-            for (int scanner = 0; scanner < scannedBeacons.Length; scanner++)
+            foreach (Vector3 s1 in scannerLocations)
             {
-                foreach (Vector3 beacon in scannedBeacons[scanner])
+                foreach (Vector3 s2 in scannerLocations)
                 {
-                    Vector3 location = absoluteLocations[scanner] + Vector3.Transform(beacon, absoluteOrientations[scanner]);
-
-                    beaconLocations[Round(location)] = true;
+                    maxDist = (int)Math.Max(maxDist, Math.Abs(s1.X - s2.X) + Math.Abs(s1.Y - s2.Y) + Math.Abs(s1.Z - s2.Z));
                 }
             }
 
-            return 0;
+            return scannedBeacons[0].Length;
         }
     }
 }
