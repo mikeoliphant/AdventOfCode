@@ -209,13 +209,13 @@ namespace AdventOfCode
                 yield return GetValue(x - 1, y);
 
             if (x < (Width - 1))
-            yield return GetValue(x + 1, y);
+                yield return GetValue(x + 1, y);
 
             if (y > 0)
                 yield return GetValue(x, y - 1);
 
             if (y < (Height - 1))
-            yield return GetValue(x, y + 1);
+                yield return GetValue(x, y + 1);
 
             if (includeDiagonal)
             {
