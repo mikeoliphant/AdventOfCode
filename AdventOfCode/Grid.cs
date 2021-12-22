@@ -64,6 +64,31 @@ namespace AdventOfCode
             }
         }
 
+        public static void Copy(Grid<T> src, Grid<T> dest, int srcX, int srcY, int srcWidth, int srcHeight, int destX, int destY)
+        {
+            for (int x = 0; x < srcWidth; x++)
+            {
+                for (int y = 0; y < srcHeight; y++)
+                {
+                    dest.SetValue(destX + x, destY + y, src[x + srcX, y + srcY]);
+                }
+            }
+        }
+
+        public bool MatchesPattern(Grid<T> patternGrid, int xOffset, int yOffset, T wildcard)
+        {
+            for (int y = 0; y < patternGrid.Height; y++)
+            {
+                for (int x = 0; x < patternGrid.Width; x++)
+                {
+                    if (!(patternGrid.GetValue(x, y).Equals(wildcard) || patternGrid.GetValue(x, y).Equals(GetValue(xOffset + x, yOffset + y))))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
         public void Fill(T value)
         {
             for (int y = 0; y < Height; y++)
@@ -98,6 +123,68 @@ namespace AdventOfCode
                     }
                 }
             }
+        }
+
+        public T GetTransformedValue(int x, int y, int rotation, bool flipX, bool flipY)
+        {
+            if (flipX)
+                x = Width - x - 1;
+
+            if (flipY)
+                y = Height - y - 1;
+
+            switch (rotation)
+            {
+                case 0:
+                    return GetValue(x, y);
+
+                case 1:
+                    return GetValue(y, Width - x - 1);
+
+                case 2:
+                    return GetValue(Width - x - 1, Height - y - 1);
+
+                case 3:
+                    return GetValue(Height - y - 1, x);
+
+            }
+
+            throw new ArgumentException("'rotation' must be 0-3");
+        }
+
+        public IEnumerable<T> GetEdge(int edge)
+        {
+            switch (edge)
+            {
+                case 0:
+                    return (from x in Enumerable.Range(0, Width) select this[x, 0]);
+
+                case 1:
+                    return (from y in Enumerable.Range(0, Height) select this[Width - 1, y]);
+
+                case 2:
+                    return (from x in Enumerable.Range(0, Width).Reverse() select this[x, Height - 1]);
+
+                case 3:
+                    return (from y in Enumerable.Range(0, Height).Reverse() select this[0, y]);
+            }
+
+            throw new ArgumentException("'edge' must be 0-3");
+        }
+
+        public Grid<T> Transform(int rotation, bool flipX, bool flipY)
+        {
+            Grid<T> newGrid = new Grid<T>(Width, Height);
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    newGrid[x, y] = GetTransformedValue(x, y, rotation, flipX, flipY);
+                }
+            }
+
+            return newGrid;
         }
 
         public IEnumerable<T> AllNeighbors(int x, int y, bool includeDiagonal)

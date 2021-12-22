@@ -114,7 +114,7 @@ namespace AdventOfCode._2021
 
                         if (localScores[player] >= maxScore)
                         {
-                            numWins[player] += ((player == 0) ? (rolls1.Value * rolls2.Value) : (rolls1.Value * rolls2.Value)) * numInstances;
+                            numWins[player] += rolls1.Value * rolls2.Value * numInstances;
 
                             haveWinner = true;
 
