@@ -19,15 +19,11 @@ namespace AdventOfCode
 
     public class DijkstraSearch<T> where T : IEquatable<T>
     {
-        Func<T, T, float> EstimateCost { get; set; }
+        Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors;
 
-        Func<T, IEnumerable<T>> getNeighbors;
-        Func<T, T, float> getNeighborCost;
-
-        public DijkstraSearch(Func<T, IEnumerable<T>> getNeighbors, Func<T, T, float> getNeighborCost)
+        public DijkstraSearch(Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors)
         {
             this.getNeighbors = getNeighbors;
-            this.getNeighborCost = getNeighborCost;
         }
 
         public bool GetShortestPath(T start, T end, out List<T> path, out float cost)
@@ -38,9 +34,9 @@ namespace AdventOfCode
             path = null;
             cost = float.MaxValue;
 
-            foreach (T neighbor in getNeighbors(start))
+            foreach (var neighbor in getNeighbors(start))
             {
-                searchQueue.Enqueue(new GraphEdge<T> { From = start, To = neighbor }, getNeighborCost(start, neighbor));
+                searchQueue.Enqueue(new GraphEdge<T> { From = start, To = neighbor.Key }, neighbor.Value);
             }
 
             do
@@ -74,9 +70,9 @@ namespace AdventOfCode
                         return true;
                     }
 
-                    foreach (T neighbor in getNeighbors(toSearch.To))
+                    foreach (var neighbor in getNeighbors(toSearch.To))
                     {
-                        searchQueue.Enqueue(new GraphEdge<T> { From = toSearch.To, To = neighbor }, cost + getNeighborCost(toSearch.To, neighbor));
+                        searchQueue.Enqueue(new GraphEdge<T> { From = toSearch.To, To = neighbor.Key }, cost + neighbor.Value);
                     }
                 }
             }

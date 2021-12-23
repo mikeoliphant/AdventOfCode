@@ -18,7 +18,7 @@ namespace AdventOfCode._2021
             cost = new Grid<int>(grid.Width, grid.Height);
         }
 
-        IEnumerable<string> GetNeighbors(string node)
+        IEnumerable<KeyValuePair<string, float>> GetNeighbors(string node)
         {
             string[] xy = node.Split('-');
 
@@ -26,26 +26,21 @@ namespace AdventOfCode._2021
             int y = int.Parse(xy[1]);
 
             if (x < (grid.Width - 1))
-                yield return (x + 1) + "-" + y;
+                yield return GetNeighbor(x + 1, y);
 
             if (y < (grid.Height - 1))
-                yield return x + "-" + (y + 1);
+                yield return GetNeighbor(x, y + 1);
 
             if (x > 0)
-                yield return (x - 1) + "-" + y;
+                yield return GetNeighbor(x - 1, y);
 
             if (y > 0)
-                yield return x + "-" + (y - 1);
+                yield return GetNeighbor(x, y - 1);
         }
 
-        float GetCost(string node1, string node2)
+        KeyValuePair<string, float> GetNeighbor(int nx, int ny)
         {
-            string[] xy = node2.Split('-');
-
-            int x = int.Parse(xy[0]);
-            int y = int.Parse(xy[1]);
-
-            return grid[x, y];
+            return new KeyValuePair<string, float>(nx + "-" + ny, grid[nx, ny]);
         }
 
         public long Compute()
@@ -54,7 +49,7 @@ namespace AdventOfCode._2021
 
             //grid.PrintToConsole();
 
-            DijkstraSearch<string> pathSearch = new DijkstraSearch<string>(GetNeighbors, GetCost);
+            DijkstraSearch<string> pathSearch = new DijkstraSearch<string>(GetNeighbors);
 
             List<string> path;
             float cost;
@@ -93,7 +88,7 @@ namespace AdventOfCode._2021
 
             //grid.PrintToConsole();
 
-            DijkstraSearch<string> pathSearch = new DijkstraSearch<string>(GetNeighbors, GetCost);
+            DijkstraSearch<string> pathSearch = new DijkstraSearch<string>(GetNeighbors);
 
             List<string> path;
             float cost;

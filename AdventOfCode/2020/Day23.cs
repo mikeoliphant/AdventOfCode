@@ -28,8 +28,6 @@ namespace AdventOfCode._2020
 
                 nodeArray = new LinkedListNode<int>[list.Count];
 
-                int pos = 0;
-
                 LinkedListNode<int> node = list.First;
 
                 do

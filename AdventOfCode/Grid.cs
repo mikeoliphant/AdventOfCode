@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AdventOfCode
 {
-    public class Grid<T>
+    public class Grid<T> : IEquatable<Grid<T>>
     {
         public int Width { get { return data.GetLength(0); } }
         public int Height { get { return data.GetLength(1); } }
@@ -22,6 +22,13 @@ namespace AdventOfCode
             : this()
         {
             data = new T[width, height];
+        }
+
+        public Grid(Grid<T> srcGrid)
+        {
+            data = new T[srcGrid.Width, srcGrid.Height];
+
+            Copy(srcGrid, this);
         }
 
         public T this[int index1, int index2]
@@ -51,6 +58,16 @@ namespace AdventOfCode
                 return;
 
             data[x, y] = value;
+        }
+
+        public virtual bool Equals(Grid<T> other)
+        {
+            return this.GetAllValues().SequenceEqual(other.GetAllValues());
+        }
+
+        public static void Copy(Grid<T> src, Grid<T> dest)
+        {
+            Copy(src, dest, 0, 0);
         }
 
         public static void Copy(Grid<T> src, Grid<T> dest, int destX, int destY)
@@ -108,6 +125,22 @@ namespace AdventOfCode
                 {
                     yield return data[x, y];
                 }
+            }
+        }
+
+        public IEnumerable<T> GetRow(int row)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                yield return data[x, row];
+            }
+        }
+
+        public IEnumerable<T> GetCol(int col)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                yield return data[col, y];
             }
         }
 

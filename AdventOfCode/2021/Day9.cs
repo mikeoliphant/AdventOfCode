@@ -78,8 +78,6 @@ namespace AdventOfCode._2021
 
             List<int> basinSizes = new List<int>();
 
-            int riskSum = 0;
-
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
