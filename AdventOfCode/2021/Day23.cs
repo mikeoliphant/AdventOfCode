@@ -268,6 +268,9 @@ namespace AdventOfCode._2021
                             if (passOne)
                                 continue;
 
+                            if ((p.Y > 2) && IsOccupied(new Point(p.X, p.Y - 1), currentState)) // Quick out if someone is above us
+                                continue;
+
                             foreach (Point hall in hallwayPoints)
                             {
                                 if (!IsOccupied(hall, currentState) && CanReach(p, hall, hallStart: false, currentState))
