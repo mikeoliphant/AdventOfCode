@@ -75,6 +75,19 @@ namespace AdventOfCode._2019
             while (RunInstruction() != 99) ;
         }
 
+        public bool RunUntilOutput()
+        {
+            int opCode = 0;
+
+            do
+            {
+                opCode = RunInstruction();
+            }
+            while ((opCode != 4) && (opCode != 99));
+
+            return (opCode == 4);
+        }
+
         long GetParam(string opcodeStr, long inputPos, int paramNum)
         {
             char mode = opcodeStr[2 - paramNum];

@@ -7,40 +7,6 @@ using System.Text.RegularExpressions;
 
 namespace AdventOfCode._2019
 {
-    public class SparseGrid<T>
-    {
-        Dictionary<Tuple<int, int>, T> data = new Dictionary<Tuple<int, int>, T>();
-
-        public T this[int index1, int index2]
-        {
-            get
-            {
-                return data[new Tuple<int, int>(index1, index2)];
-            }
-
-            set
-            {
-                data[new Tuple<int, int>(index1, index2)] = value;
-            }
-        }
-
-        public bool TryGetValue(int index1, int index2, out T value)
-        {
-            Tuple<int, int> t = new Tuple<int, int>(index1, index2);
-
-            if (data.ContainsKey(t))
-            {
-                value = data[t];
-
-                return true;
-            }
-
-            value = default(T);
-
-            return false;
-        }
-    }
-
     internal class Day3
     {
         SparseGrid<int> wire1Points = new SparseGrid<int>();
