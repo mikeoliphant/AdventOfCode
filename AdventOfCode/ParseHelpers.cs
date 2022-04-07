@@ -32,6 +32,22 @@ namespace AdventOfCode
             return input.Split(delimeter).ToInts();
         }
 
+        public static IEnumerable<long> ToLongs(this string input, char delimeter)
+        {
+            return from intStr in input.Split(delimeter) select long.Parse(intStr);
+        }
+
+        public static IEnumerable<long> ToLongs(this IEnumerable<string> input)
+        {
+            return from intStr in input select long.Parse(intStr);
+        }
+
+        public static IEnumerable<long> ToLongs(this string input, string delimeter)
+        {
+            return input.Split(delimeter).ToLongs();
+        }
+
+
         public static IEnumerable<float> ToFloats(this IEnumerable<string> input)
         {
             return from floatStr in input select float.Parse(floatStr);

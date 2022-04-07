@@ -10,24 +10,20 @@ namespace AdventOfCode._2019
     {
         public long Compute()
         {
-            int[] input = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day5.txt").ToInts(',').ToArray();
+            long[] input = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day5.txt").ToLongs(',').ToArray();
 
             IntcodeComputer computer = new IntcodeComputer();
 
-            computer.AddInput(1);
-
-            return computer.RunProgram(input);
+            return computer.RunProgram(input, 1);
         }
 
         public long Compute2()
         {
-            int[] input = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day5.txt").ToInts(',').ToArray();
+            long[] input = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day5.txt").ToLongs(',').ToArray();
 
             IntcodeComputer computer = new IntcodeComputer();
 
-            computer.AddInput(5);
-
-            return computer.RunProgram(input);
+            return computer.RunProgram(input, 5);
         }
     }
 }

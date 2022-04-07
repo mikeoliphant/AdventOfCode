@@ -9,16 +9,20 @@ namespace AdventOfCode._2019
     {
         IntcodeComputer[] amplifiers = new IntcodeComputer[5];
 
-        int RunPhaseSequence(int[] phaseValues, int[] program)
+        long RunPhaseSequence(int[] phaseValues, long[] program)
         {
-            int output = 0;
+            long output = 0;
 
             for (int i = 0; i < amplifiers.Length; i++)
             {
+                amplifiers[i].SetProgram(program.Clone() as long[]);
+
                 amplifiers[i].AddInput(phaseValues[i]);
                 amplifiers[i].AddInput(output);
 
-                output = amplifiers[i].RunProgram(program.Clone() as int[]);
+                amplifiers[i].RunUntilHalt();
+
+                output = amplifiers[i].GetLastOutput();
             }
 
             return output;
@@ -71,17 +75,17 @@ namespace AdventOfCode._2019
 
         public long Compute()
         {
-            int[] program = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day7.txt").ToInts(',').ToArray();
+            long[] program = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day7.txt").ToLongs(',').ToArray();
 
             for (int i = 0; i < amplifiers.Length; i++)
                 amplifiers[i] = new IntcodeComputer();
 
-            int maxOutput = 0;
+            long maxOutput = 0;
             int[] maxPhaseSequence;
 
             foreach (int[] phaseSequence in GetAllPermutations(new int[] { 0, 1, 2, 3, 4 }))
             {
-                int output = RunPhaseSequence(phaseSequence, program);
+                long output = RunPhaseSequence(phaseSequence, program);
 
                 if (output > maxOutput)
                 {
@@ -93,13 +97,13 @@ namespace AdventOfCode._2019
             return maxOutput;
         }
 
-        int RunPhaseSequence2(int[] phaseValues, int[] program)
+        long RunPhaseSequence2(int[] phaseValues, long[] program)
         {
-            int output = 0;
+            long output = 0;
 
             for (int i = 0; i < amplifiers.Length; i++)
             {
-                amplifiers[i].SetProgram(program.Clone() as int[]);
+                amplifiers[i].SetProgram(program.Clone() as long[]);
                 amplifiers[i].AddInput(phaseValues[i]);
             }
 
@@ -135,17 +139,17 @@ namespace AdventOfCode._2019
 
         public long Compute2()
         {
-            int[] program = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day7.txt").ToInts(',').ToArray();
+            long[] program = File.ReadAllText(@"C:\Code\AdventOfCode\Input\2019\Day7.txt").ToLongs(',').ToArray();
 
             for (int i = 0; i < amplifiers.Length; i++)
                 amplifiers[i] = new IntcodeComputer();
 
-            int maxOutput = 0;
+            long maxOutput = 0;
             int[] maxPhaseSequence;
 
             foreach (int[] phaseSequence in GetAllPermutations(new int[] { 5, 6, 7, 8, 9 }))
             {
-                int output = RunPhaseSequence2(phaseSequence, program);
+                long output = RunPhaseSequence2(phaseSequence, program);
 
                 if (output > maxOutput)
                 {

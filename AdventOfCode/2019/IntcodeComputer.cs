@@ -8,54 +8,65 @@ namespace AdventOfCode._2019
 {
     internal class IntcodeComputer
     {
-        int lastOutput;
-        List<int> inputValues = new List<int>();
-        int[] program = null;
-        int currentProgramPos = 0;
+        long lastOutput;
+        List<long> inputValues = new List<long>();
+        long currentProgramPos = 0;
+        long relativeBase = 0;
+        Dictionary<long, long> memory = new Dictionary<long, long>();
 
-        public void AddInput(int input)
+        public void AddInput(long input)
         {
             inputValues.Add(input);
         }
 
-        public void SetInput(List<int> inputs)
+        public void SetInput(List<long> inputs)
         {
-            inputValues = new List<int>(inputs);
+            inputValues = new List<long>(inputs);
         }
 
-        int GetInput()
+        long GetInput()
         {
-            int value = inputValues[0];
+            long value = inputValues[0];
 
             inputValues.RemoveAt(0);
 
             return value;
         }
 
-        void WriteOutput(int output)
+        void WriteOutput(long output)
         {
             lastOutput = output;
         }
 
-        public int GetLastOutput()
+        public long GetLastOutput()
         {
             return lastOutput;
         }
 
-        int GetParam(string opcodeStr, int[] input, int inputPos, int paramNum)
+        public void SetMemory(long pos, long value)
         {
-            char mode = opcodeStr[2 - paramNum];
-
-            if (mode == '0')
-                return input[input[inputPos + paramNum + 1]];
-            else
-                return input[inputPos + paramNum + 1];
+            memory[pos] = value;
         }
 
-        public void SetProgram(int[] program)
+        public long GetMemory(long pos)
         {
-            this.program = program;
+            if (!memory.ContainsKey(pos))
+                return 0;
+
+            return memory[pos];
+        }
+
+        public void SetProgram(long[] program)
+        {
+            memory.Clear();
+
+            for (int i = 0; i < program.Length; i++)
+            {
+                SetMemory(i, program[i]);
+            }
+
             currentProgramPos = 0;
+            relativeBase = 0;
             inputValues.Clear();
         }
 
@@ -64,34 +75,68 @@ namespace AdventOfCode._2019
             while (RunInstruction() != 99) ;
         }
 
+        long GetParam(string opcodeStr, long inputPos, int paramNum)
+        {
+            char mode = opcodeStr[2 - paramNum];
+
+            switch (mode)
+            {
+                case '0':
+                    return GetMemory(GetMemory(inputPos + paramNum + 1));
+                case '1':
+                    return GetMemory(inputPos + paramNum + 1);
+                case '2':
+                    return GetMemory(GetMemory(inputPos + paramNum + 1) + relativeBase);
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        void WriteParam(string opcodeStr, long inputPos, int paramNum, long value)
+        {
+            char mode = opcodeStr[2 - paramNum];
+
+            switch (mode)
+            {
+                case '0':
+                    SetMemory(GetMemory(inputPos + paramNum + 1), value);
+                    return;
+                case '2':
+                    SetMemory(GetMemory(inputPos + paramNum + 1) + relativeBase, value);
+                    return;
+            }
+
+            throw new InvalidOperationException();
+        }
+
         public int RunInstruction()
         {
-            string opCodeStr = program[currentProgramPos].ToString().PadLeft(5, '0');
+            string opCodeStr = GetMemory(currentProgramPos).ToString().PadLeft(5, '0');
 
             int opCode = int.Parse(opCodeStr.Substring(3));
 
             switch (opCode)
             {
                 case 1:
-                    program[program[currentProgramPos + 3]] = GetParam(opCodeStr, program, currentProgramPos, 0) + GetParam(opCodeStr, program, currentProgramPos, 1);
+                    WriteParam(opCodeStr, currentProgramPos, 2,  GetParam(opCodeStr, currentProgramPos, 0) + GetParam(opCodeStr, currentProgramPos, 1));
                     currentProgramPos += 4;
                     break;
                 case 2:
-                    program[program[currentProgramPos + 3]] = GetParam(opCodeStr, program, currentProgramPos, 0) * GetParam(opCodeStr, program, currentProgramPos, 1);
+                    WriteParam(opCodeStr, currentProgramPos, 2, GetParam(opCodeStr, currentProgramPos, 0) * GetParam(opCodeStr, currentProgramPos, 1));
                     currentProgramPos += 4;
                     break;
                 case 3:
-                    program[program[currentProgramPos + 1]] = GetInput();
+                    WriteParam(opCodeStr, currentProgramPos, 0, GetInput());
                     currentProgramPos += 2;
                     break;
                 case 4:
-                    WriteOutput(GetParam(opCodeStr, program, currentProgramPos, 0));
+                    WriteOutput(GetParam(opCodeStr, currentProgramPos, 0));
                     currentProgramPos += 2;
                     break;
                 case 5:
-                    if (GetParam(opCodeStr, program, currentProgramPos, 0) != 0)
+                    if (GetParam(opCodeStr, currentProgramPos, 0) != 0)
                     {
-                        currentProgramPos = GetParam(opCodeStr, program, currentProgramPos, 1);
+                        currentProgramPos = GetParam(opCodeStr, currentProgramPos, 1);
                     }
                     else
                     {
@@ -99,9 +144,9 @@ namespace AdventOfCode._2019
                     }
                     break;
                 case 6:
-                    if (GetParam(opCodeStr, program, currentProgramPos, 0) == 0)
+                    if (GetParam(opCodeStr, currentProgramPos, 0) == 0)
                     {
-                        currentProgramPos = GetParam(opCodeStr, program, currentProgramPos, 1);
+                        currentProgramPos = GetParam(opCodeStr, currentProgramPos, 1);
                     }
                     else
                     {
@@ -109,28 +154,33 @@ namespace AdventOfCode._2019
                     }
                     break;
                 case 7:
-                    if (GetParam(opCodeStr, program, currentProgramPos, 0) < GetParam(opCodeStr, program, currentProgramPos, 1))
+                    if (GetParam(opCodeStr, currentProgramPos, 0) < GetParam(opCodeStr, currentProgramPos, 1))
                     {
-                        program[program[currentProgramPos + 3]] = 1;
+                        WriteParam(opCodeStr, currentProgramPos, 2, 1);
                     }
                     else
                     {
-                        program[program[currentProgramPos + 3]] = 0;
+                        WriteParam(opCodeStr, currentProgramPos, 2, 0);
                     }
 
                     currentProgramPos += 4;
                     break;
                 case 8:
-                    if (GetParam(opCodeStr, program, currentProgramPos, 0) == GetParam(opCodeStr, program, currentProgramPos, 1))
+                    if (GetParam(opCodeStr, currentProgramPos, 0) == GetParam(opCodeStr, currentProgramPos, 1))
                     {
-                        program[program[currentProgramPos + 3]] = 1;
+                        WriteParam(opCodeStr, currentProgramPos, 2, 1);
                     }
                     else
                     {
-                        program[program[currentProgramPos + 3]] = 0;
+                        WriteParam(opCodeStr, currentProgramPos, 2, 0);
                     }
 
                     currentProgramPos += 4;
+                    break;
+                case 9:
+                    relativeBase += GetParam(opCodeStr, currentProgramPos, 0);
+
+                    currentProgramPos += 2;
                     break;
                 case 99:
                     break;
@@ -141,9 +191,22 @@ namespace AdventOfCode._2019
             return opCode;
         }
 
-        public int RunProgram(int[] program)
+        public long RunProgram(long[] program)
+        {
+            return RunProgram(program, new long[0]);
+        }
+
+        public long RunProgram(long[] program, long input)
+        {
+            return RunProgram(program, new long[] { input });
+        }
+
+        public long RunProgram(long[] program, IEnumerable<long> input)
         {
             SetProgram(program);
+
+            foreach (long i in input)
+                AddInput(i);
 
             RunUntilHalt();
 
