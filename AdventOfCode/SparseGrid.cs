@@ -38,6 +38,11 @@ namespace AdventOfCode
             return false;
         }
 
+        public IEnumerable<T> GetAllValues()
+        {
+            return data.Values;
+        }
+
         public void PrintToConsole()
         {
             int minX = int.MaxValue;

@@ -8,11 +8,14 @@ namespace AdventOfCode._2019
 {
     internal class IntcodeComputer
     {
+        public Func<long> InputFunc { get; set; }
+
         long lastOutput;
         List<long> inputValues = new List<long>();
         long currentProgramPos = 0;
         long relativeBase = 0;
         Dictionary<long, long> memory = new Dictionary<long, long>();
+        long memoryStart = 0;
 
         public void AddInput(long input)
         {
@@ -26,6 +29,9 @@ namespace AdventOfCode._2019
 
         long GetInput()
         {
+            if (InputFunc != null)
+                return InputFunc();
+
             long value = inputValues[0];
 
             inputValues.RemoveAt(0);
@@ -45,11 +51,13 @@ namespace AdventOfCode._2019
 
         public void SetMemory(long pos, long value)
         {
-            memory[pos] = value;
+            memory[memoryStart + pos] = value;
         }
 
         public long GetMemory(long pos)
         {
+            pos += memoryStart;
+
             if (!memory.ContainsKey(pos))
                 return 0;
 
@@ -59,6 +67,8 @@ namespace AdventOfCode._2019
         public void SetProgram(long[] program)
         {
             memory.Clear();
+
+            memoryStart = program.LongLength;
 
             for (int i = 0; i < program.Length; i++)
             {
