@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 namespace AdventOfCode._2019
 {
     internal class Day14
