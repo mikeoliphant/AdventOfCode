@@ -43,12 +43,12 @@ namespace AdventOfCode
             return data.Values;
         }
 
-        public void PrintToConsole()
+        public void GetBounds(out int minX, out int minY, out int maxX, out int maxY)
         {
-            int minX = int.MaxValue;
-            int maxX = int.MinValue;
-            int minY = int.MaxValue;
-            int maxY = int.MinValue;
+            minX = int.MaxValue;
+            maxX = int.MinValue;
+            minY = int.MaxValue;
+            maxY = int.MinValue;
 
             foreach (ValueTuple<int, int> t in data.Keys)
             {
@@ -57,6 +57,16 @@ namespace AdventOfCode
                 minY = Math.Min(minY, t.Item2);
                 maxY = Math.Max(maxY, t.Item2);
             }
+        }
+
+        public void PrintToConsole()
+        {
+            int minX;
+            int maxX;
+            int minY;
+            int maxY;
+
+            GetBounds(out minX, out minY, out maxX, out maxY);
 
             for (int y = minY; y <= maxY; y++)
             {
@@ -71,6 +81,34 @@ namespace AdventOfCode
 
                 Console.WriteLine();
             }
+        }
+
+        public Grid<T> ToGrid()
+        {
+            int minX;
+            int maxX;
+            int minY;
+            int maxY;
+
+            GetBounds(out minX, out minY, out maxX, out maxY);
+
+            int width = maxX - minX + 1;
+            int height = maxY - minY + 1;
+
+            Grid<T> grid = new Grid<T>(width, height);
+
+            T value = default(T);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (TryGetValue(x, y, out value))
+                        grid[x - minX, y - minY] = value;
+                }
+            }
+
+            return grid;
         }
 
         T blocker;

@@ -10,6 +10,7 @@ namespace AdventOfCode._2019
     {
         public Func<long> InputFunc { get; set; }
 
+        long[] program = null;
         long lastOutput;
         List<long> inputValues = new List<long>();
         long currentProgramPos = 0;
@@ -64,20 +65,31 @@ namespace AdventOfCode._2019
             return memory[pos];
         }
 
-        public void SetProgram(long[] program)
+        public void Reset()
         {
             memory.Clear();
 
-            memoryStart = program.LongLength;
-
-            for (int i = 0; i < program.Length; i++)
+            if (program != null)
             {
-                SetMemory(i, program[i]);
+                memoryStart = program.LongLength;
+
+                for (int i = 0; i < program.Length; i++)
+                {
+                    SetMemory(i, program[i]);
+                }
             }
 
             currentProgramPos = 0;
             relativeBase = 0;
+
             inputValues.Clear();
+        }
+
+        public void SetProgram(long[] program)
+        {
+            this.program = program;
+
+            Reset();
         }
 
         public void RunUntilHalt()

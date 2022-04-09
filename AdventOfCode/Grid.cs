@@ -129,6 +129,18 @@ namespace AdventOfCode
             }
         }
 
+        public IEnumerable<ValueTuple<int, int>> Find(T value)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (data[x, y].Equals(value))
+                        yield return (x, y);
+                }
+            }
+        }
+
         public IEnumerable<T> GetAllValues()
         {
             for (int y = 0; y < Height; y++)
