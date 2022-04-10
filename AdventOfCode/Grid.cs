@@ -141,6 +141,22 @@ namespace AdventOfCode
             }
         }
 
+        public long Count(T value)
+        {
+            long count = 0;
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (data[x, y].Equals(value))
+                        count++;
+                }
+            }
+
+            return count;
+        }
+
         public IEnumerable<T> GetAllValues()
         {
             for (int y = 0; y < Height; y++)
