@@ -57,7 +57,7 @@ namespace AdventOfCode._2019
                 {
                     int numScaffoldNeighbors = 0;
 
-                    foreach (char c in grid.ValidNeighbors(x, y, includeDiagonal: false))
+                    foreach (char c in grid.ValidNeighborValues(x, y, includeDiagonal: false))
                     {
                         if (c != '.')
                             numScaffoldNeighbors++;

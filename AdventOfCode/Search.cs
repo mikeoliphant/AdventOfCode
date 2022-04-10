@@ -28,6 +28,11 @@ namespace AdventOfCode
 
         public bool GetShortestPath(T start, T end, out List<T> path, out float cost)
         {
+            return GetShortestPath(start, delegate (T t) { return t.Equals(end); }, out path, out cost);
+        }
+
+        public bool GetShortestPath(T start, Func<T, bool> endCheck, out List<T> path, out float cost)
+        {
             PriorityQueue<GraphEdge<T>, float> searchQueue = new PriorityQueue<GraphEdge<T>, float>();
             Dictionary<T, T> pred = new Dictionary<T, T>(); 
 
@@ -49,7 +54,7 @@ namespace AdventOfCode
                 {
                     pred[toSearch.To] = toSearch.From;
 
-                    if (toSearch.To.Equals(end))
+                    if (endCheck(toSearch.To))
                     {
                         path = new List<T>();
 
@@ -65,7 +70,7 @@ namespace AdventOfCode
                             val = pred[val];
                         }
 
-                        path.Insert(0, start);
+                        //path.Insert(0, start);
 
                         return true;
                     }
