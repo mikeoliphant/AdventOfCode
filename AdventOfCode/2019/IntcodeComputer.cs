@@ -12,7 +12,7 @@ namespace AdventOfCode._2019
 
         long[] program = null;
         long lastOutput;
-        List<long> inputValues = new List<long>();
+        Queue<long> inputValues = new Queue<long>();
         long currentProgramPos = 0;
         long relativeBase = 0;
         Dictionary<long, long> memory = new Dictionary<long, long>();
@@ -20,24 +20,27 @@ namespace AdventOfCode._2019
 
         public void AddInput(long input)
         {
-            inputValues.Add(input);
+            inputValues.Enqueue(input);
         }
 
         public void SetInput(List<long> inputs)
         {
-            inputValues = new List<long>(inputs);
+            inputValues = new Queue<long>(inputs);
         }
 
         long GetInput()
         {
+            if (inputValues.Count > 0)
+            {
+                long value = inputValues.Dequeue();
+
+                return value;
+            }
+
             if (InputFunc != null)
                 return InputFunc();
 
-            long value = inputValues[0];
-
-            inputValues.RemoveAt(0);
-
-            return value;
+            throw new InvalidOperationException();
         }
 
         void WriteOutput(long output)
@@ -47,6 +50,13 @@ namespace AdventOfCode._2019
 
         public long GetLastOutput()
         {
+            return lastOutput;
+        }
+
+        public long GetNextOutput()
+        {
+            RunUntilOutput();
+
             return lastOutput;
         }
 
