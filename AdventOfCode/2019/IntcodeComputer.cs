@@ -10,6 +10,7 @@ namespace AdventOfCode._2019
     {
         public Func<long> InputFunc { get; set; }
 
+        bool halted = false;
         long[] program = null;
         long lastOutput;
         Queue<long> inputValues = new Queue<long>();
@@ -60,6 +61,21 @@ namespace AdventOfCode._2019
             return lastOutput;
         }
 
+        public Dictionary<long, long> SnapshotMemory()
+        {
+            Dictionary<long, long> snapshot = new Dictionary<long, long>();
+
+            foreach (var loc in memory)
+            {
+                if (loc.Key >= memoryStart)
+                {
+                    snapshot[loc.Key - memoryStart] = loc.Value;
+                }
+            }
+
+            return snapshot;
+        }
+
         public void SetMemory(long pos, long value)
         {
             memory[memoryStart + pos] = value;
@@ -77,6 +93,8 @@ namespace AdventOfCode._2019
 
         public void Reset()
         {
+            halted = false;
+
             memory.Clear();
 
             if (program != null)
@@ -156,6 +174,9 @@ namespace AdventOfCode._2019
 
         public int RunInstruction()
         {
+            if (halted)
+                throw new InvalidOperationException();
+
             string opCodeStr = GetMemory(currentProgramPos).ToString().PadLeft(5, '0');
 
             int opCode = int.Parse(opCodeStr.Substring(3));
@@ -228,6 +249,7 @@ namespace AdventOfCode._2019
                     currentProgramPos += 2;
                     break;
                 case 99:
+                    halted = true;
                     break;
                 default:
                     throw new InvalidOperationException();
