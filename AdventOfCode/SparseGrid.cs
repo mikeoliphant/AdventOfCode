@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace AdventOfCode
 {
@@ -41,6 +42,28 @@ namespace AdventOfCode
         public IEnumerable<T> GetAllValues()
         {
             return data.Values;
+        }
+
+        public IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    yield return (x, y);
+                }
+            }
+        }
+
+        public IEnumerable<T> GetRectangleValues(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    yield return data[(x, y)];
+                }
+            }
         }
 
         public void GetBounds(out int minX, out int minY, out int maxX, out int maxY)

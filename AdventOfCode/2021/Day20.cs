@@ -46,7 +46,7 @@ namespace AdventOfCode._2021
                 {
                     string binaryString = "";
 
-                    foreach (char c in image.GetWindow(x, y, 1, includeSelf: true))
+                    foreach (char c in image.GetWindowValues(x, y, 1, includeSelf: true))
                     {
                         binaryString += (c == '#') ? '1' : '0';
                     }

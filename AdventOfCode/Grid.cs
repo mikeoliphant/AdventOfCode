@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace AdventOfCode
@@ -168,7 +169,7 @@ namespace AdventOfCode
             }
         }
 
-        public IEnumerable<T> GetRow(int row)
+        public IEnumerable<T> GetRowValues(int row)
         {
             for (int x = 0; x < Width; x++)
             {
@@ -176,7 +177,7 @@ namespace AdventOfCode
             }
         }
 
-        public IEnumerable<T> GetCol(int col)
+        public IEnumerable<T> GetColValues(int col)
         {
             for (int y = 0; y < Height; y++)
             {
@@ -184,7 +185,29 @@ namespace AdventOfCode
             }
         }
 
-        public IEnumerable<T> GetWindow(int x, int y, int size, bool includeSelf)
+        public IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    yield return (x, y);
+                }
+            }
+        }
+
+        public IEnumerable<T> GetRectangleValues(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    yield return data[x, y];
+                }
+            }
+        }
+
+        public IEnumerable<T> GetWindowValues(int x, int y, int size, bool includeSelf)
         {
             for (int dy = -size; dy <= size; dy++)
             {

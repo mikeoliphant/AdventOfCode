@@ -26,9 +26,9 @@ namespace AdventOfCode._2021
         {
             for (int i = 0; i < 4; i++)
             {
-                foreach (Point p in this.GetCol(i))
+                foreach (Point p in this.GetColValues(i))
                 {
-                    if (!other.GetCol(i).Contains(p))
+                    if (!other.GetColValues(i).Contains(p))
                         return false;
                 }
             }
@@ -154,7 +154,7 @@ namespace AdventOfCode._2021
 
             for (int y = p.Y + 1; y < (PodPositions.NumPods + 2); y++)
             {
-                if (!currentState.GetCol(podType).Contains(new Point(p.X, y)))  // Only go home if home spots below are occupied with buddies
+                if (!currentState.GetColValues(podType).Contains(new Point(p.X, y)))  // Only go home if home spots below are occupied with buddies
                     return false;
             }
 
@@ -238,7 +238,7 @@ namespace AdventOfCode._2021
                     {
                         Point p = currentState[podType, pod];
 
-                        if (destPoints.GetCol(podType).Contains(p) && IsHome(podType, pod, p, alreadyThere: true, currentState))     // If we're home, don't move again
+                        if (destPoints.GetColValues(podType).Contains(p) && IsHome(podType, pod, p, alreadyThere: true, currentState))     // If we're home, don't move again
                         {
                             continue;
                         }
@@ -248,7 +248,7 @@ namespace AdventOfCode._2021
                             if (!passOne)
                                 continue;
 
-                            foreach (Point dest in destPoints.GetCol(podType))
+                            foreach (Point dest in destPoints.GetColValues(podType))
                             {
                                 if (IsHome(podType, pod, dest, alreadyThere: false, currentState))
                                 {
