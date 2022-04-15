@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-
-namespace AdventOfCode._2018
+﻿namespace AdventOfCode._2018
 {
     internal class Day4
     {

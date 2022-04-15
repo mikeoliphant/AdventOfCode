@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Text.RegularExpressions;
-
-namespace AdventOfCode._2020
+﻿namespace AdventOfCode._2020
 {
     internal class Day25
     {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-
-namespace AdventOfCode
+﻿namespace AdventOfCode
 {
     public class Grid<T> : IEquatable<Grid<T>>
     {

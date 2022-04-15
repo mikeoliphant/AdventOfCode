@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace AdventOfCode._2019
+﻿namespace AdventOfCode._2019
 {
     internal class Day6
     {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-
-namespace AdventOfCode
+﻿namespace AdventOfCode
 {
     public class SparseGrid<T>
     {
