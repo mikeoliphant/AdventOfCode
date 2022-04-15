@@ -1,6 +1,4 @@
-﻿using System.Text.RegularExpressions;
-
-namespace AdventOfCode._2021
+﻿namespace AdventOfCode._2021
 {
     public class Day4
     {

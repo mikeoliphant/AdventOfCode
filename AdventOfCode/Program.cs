@@ -4,6 +4,7 @@ global using System.Drawing;
 global using System.IO;
 global using System.Linq;
 global using System.Numerics;
+global using System.Text.RegularExpressions;
 
 namespace AdventOfCode
 {
@@ -11,7 +12,7 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            long result = new AdventOfCode._2018.Day9().Compute();
+            long result = new AdventOfCode._2018.Day10().Compute();
         }
 
     }

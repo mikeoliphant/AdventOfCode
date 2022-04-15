@@ -42,7 +42,6 @@
             return input.Split(delimeter).ToLongs();
         }
 
-
         public static IEnumerable<float> ToFloats(this IEnumerable<string> input)
         {
             return from floatStr in input select float.Parse(floatStr);
@@ -56,6 +55,13 @@
         public static IEnumerable<IEnumerable<int>> ReadZeroToNineGrid(string input)
         {
             return from line in input.TrimEnd().SplitLines() select (from c in line.ToCharArray() select (int)(c - '0'));
+        }
+
+        public static Point ToPoint(this string pointStr)
+        {
+            string[] split = pointStr.Split(',');
+
+            return new Point(int.Parse(split[0]), int.Parse(split[1]));
         }
     }
 }

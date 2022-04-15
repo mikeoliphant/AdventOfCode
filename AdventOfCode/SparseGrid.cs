@@ -35,6 +35,11 @@
             return false;
         }
 
+        public IEnumerable<(int X, int Y)> GetAll()
+        {
+            return data.Keys;
+        }
+
         public IEnumerable<T> GetAllValues()
         {
             return data.Values;
@@ -130,9 +135,21 @@
             return grid;
         }
 
+        public IEnumerable<(int X, int Y)> GetValidNeighbors(int x, int y)
+        {
+            if (data.ContainsKey((x - 1, y)))
+                yield return (x - 1, y);
+            if (data.ContainsKey((x - 1, y)))
+                yield return ((x - 1, y));
+            if (data.ContainsKey((x, y - 1)))
+                yield return (x, y - 1);
+            if (data.ContainsKey((x, y + 1)))
+                yield return (x, y + 1);
+        }
+
         T blocker;
 
-        IEnumerable<KeyValuePair<ValueTuple<int, int>, float>> GetNeighbors(ValueTuple<int, int> position)
+        IEnumerable<KeyValuePair<ValueTuple<int, int>, float>> GetUnblockedNeighbors(ValueTuple<int, int> position)
         {
             ValueTuple<int, int> north = (position.Item1, position.Item2 - 1);
 
@@ -159,7 +176,7 @@
         {
             this.blocker = blocker;
 
-            DijkstraSearch<ValueTuple<int, int>> search = new DijkstraSearch<ValueTuple<int, int>>(GetNeighbors);
+            DijkstraSearch<ValueTuple<int, int>> search = new DijkstraSearch<ValueTuple<int, int>>(GetUnblockedNeighbors);
 
             return search.GetShortestPath((startX, startY), (endX, endY), out path, out cost);
         }
