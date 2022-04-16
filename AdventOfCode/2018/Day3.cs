@@ -42,7 +42,7 @@
 
             for (int pos = 0; pos < claims.Count; pos++)
             {
-                if (grid.GetRectangleValues(claims[pos]).Count(g => g == 1) == (claims[pos].Width * claims[pos].Height))
+                if (grid.GetAllRectangleValues(claims[pos]).Count(g => g == 1) == (claims[pos].Width * claims[pos].Height))
                 {
                     return pos + 1;
                 }

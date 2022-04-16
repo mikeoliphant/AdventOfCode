@@ -56,13 +56,27 @@
             }
         }
 
-        public IEnumerable<T> GetRectangleValues(Rectangle rect)
+        public IEnumerable<T> GetAllRectangleValues(Rectangle rect)
         {
             for (int y = rect.Top; y < rect.Bottom; y++)
             {
                 for (int x = rect.X; x < rect.Right; x++)
                 {
                     yield return data[(x, y)];
+                }
+            }
+        }
+
+        public IEnumerable<T> GetValidRectangleValues(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    T value;
+
+                    if (TryGetValue(x, y, out value))
+                        yield return value;
                 }
             }
         }
