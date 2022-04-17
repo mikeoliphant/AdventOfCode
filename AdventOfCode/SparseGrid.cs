@@ -4,6 +4,13 @@
     {
         Dictionary<ValueTuple<int, int>, T> data = new Dictionary<ValueTuple<int, int>, T>();
 
+        public T DefaultValue { get; set; }
+
+        public SparseGrid()
+        {
+            DefaultValue = default(T);
+        }
+
         public T this[int index1, int index2]
         {
             get
@@ -30,7 +37,7 @@
                 return true;
             }
 
-            value = default(T);
+            value = DefaultValue;
 
             return false;
         }
@@ -135,7 +142,7 @@
 
             Grid<T> grid = new Grid<T>(width, height);
 
-            T value = default(T);
+            T value = DefaultValue;
 
             for (int y = 0; y < height; y++)
             {
