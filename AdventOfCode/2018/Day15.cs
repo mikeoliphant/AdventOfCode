@@ -8,7 +8,7 @@
             {
                 if (x.Cost == y.Cost)
                 {
-                    return ((x.Node.Y * 1000) + x.Node.X).CompareTo((y.Node.Y * 1000) + y.Node.X);
+                    return ReadPos(x.Node.X, x.Node.Y).CompareTo(ReadPos(y.Node.X, y.Node.Y));
                 }
 
                 return x.Cost.CompareTo(y.Cost);
@@ -40,7 +40,7 @@
 
             public int ReadPos
             {
-                get { return (Y * 1000) + X; }
+                get { return ReadPos(X, Y); }
             }
 
             public override string ToString()
@@ -62,15 +62,24 @@
         }
 
         Grid<char> grid;
-        List<Dude> dudes = new List<Dude>();
-        Dictionary<(int X, int Y), Dude> dudesOnGrid = new Dictionary<(int X, int Y), Dude>();
+        List<Dude> dudes;
+        Dictionary<(int X, int Y), Dude> dudesOnGrid;
         bool done = false;
         int goblinAttackPower = 3;
         int elfAttackPower = 3;
+        bool keepElvesAlive = false;
+
+        public static int ReadPos(int x, int y)
+        {
+            return y * 1000 + x;
+        }
 
         public void ReadInput()
         {
             grid = new Grid<char>().CreateDataFromRows(File.ReadLines(@"C:\Code\AdventOfCode\Input\2018\Day15.txt"));
+
+            dudes = new List<Dude>();
+            dudesOnGrid = new Dictionary<(int X, int Y), Dude>();
 
             foreach (var pos in grid.GetAll())
             {
@@ -164,7 +173,7 @@
 
         bool DoAttack(Dude dude)
         {
-            var adjacentEnemies = grid.ValidNeighbors(dude.X, dude.Y, includeDiagonal: false).Where(g => (grid[g.X, g.Y]) == dude.Enemy).Select(g => dudesOnGrid[(g.X, g.Y)]).Where(g => (g.HP > 0));
+            var adjacentEnemies = grid.ValidNeighbors(dude.X, dude.Y).Where(e => (grid[e.X, e.Y]) == dude.Enemy).Select(e => dudesOnGrid[(e.X, e.Y)]).Where(e => (e.HP > 0));
 
             if (adjacentEnemies.Any())
             {
@@ -177,7 +186,11 @@
                     grid[enemy.X, enemy.Y] = '.';
                     dudesOnGrid.Remove((enemy.X, enemy.Y));
 
-                    if (Finished())
+                    if (keepElvesAlive && (enemy is Elf))
+                    {
+                        done = true;
+                    }
+                    else if (Finished())
                     {
                         done = true;
                     }
@@ -191,15 +204,10 @@
             return false;
         }
 
-        public long Compute()
+        public int SimulateBattle()
         {
-            elfAttackPower = 23;
-
-            ReadInput();
-
-            grid.PrintToConsole();
-
             int round = 0;
+            done = false;
 
             do
             {
@@ -216,12 +224,14 @@
                         continue;
 
                     if (done)
-                        goto end;
+                        return round;
 
                     if (DoAttack(dude))
                     {
                         continue;
                     }
+
+                    HashSet<(int X, int Y)> possibleTargets = new HashSet<(int X, int Y)>();
 
                     int minCost = int.MaxValue;
                     (int X, int Y) minStep = (0, 0);
@@ -233,25 +243,30 @@
 
                         if (dude.GetType() != dude2.GetType())
                         {
-                            foreach (var adj in GetUnblockedNeighbors((dude.X, dude.Y)))
+                            foreach (var pos in GetUnblockedNeighbors((dude2.X, dude2.Y)))
                             {
-                                foreach (var pos in GetUnblockedNeighbors((dude2.X, dude2.Y)))
-                                {
-                                    List<(int X, int Y)> path;
-                                    float cost;
-
-                                    if (GetShortestPath(adj.X, adj.Y, pos.X, pos.Y, out path, out cost))
-                                    {
-                                        if (cost < minCost)
-                                        {
-                                            minCost = (int)cost;
-                                            minStep = adj;
-                                        }
-                                    }
-                                }
+                                possibleTargets.Add(pos);
                             }
                         }
                     }
+
+                    foreach (var target in possibleTargets.OrderBy(t => ReadPos(t.X, t.Y)))
+                    {
+                        foreach (var adj in GetUnblockedNeighbors((dude.X, dude.Y)))
+                        {
+                            List<(int X, int Y)> path;
+                            float cost;
+
+                            if (GetShortestPath(adj.X, adj.Y, target.X, target.Y, out path, out cost))
+                            {
+                                if (cost < minCost)
+                                {
+                                    minCost = (int)cost;
+                                    minStep = adj;
+                                }
+                            }
+                        }
+                    }                    
 
                     if (minCost < int.MaxValue)
                     {
@@ -273,7 +288,20 @@
             }
             while (!done);
 
-        end:
+            return round;
+        }
+
+        public long Compute()
+        {
+            int round;
+
+            ReadInput();
+
+            int startElves = dudes.Where(d => (d is Elf) && (d.HP > 0)).Count();
+
+            grid.PrintToConsole();
+
+            round = SimulateBattle();
 
             int sumHP = 0;
 
@@ -283,7 +311,42 @@
                     sumHP += dude.HP;
             }
 
-            grid.PrintToConsole();
+            return sumHP * round;
+        }
+
+        public long Compute2()
+        {
+            elfAttackPower = 4;
+            keepElvesAlive = true;
+
+            int round;
+
+            do
+            {
+                ReadInput();
+
+                int startElves = dudes.Where(d => (d is Elf) && (d.HP > 0)).Count();
+
+                grid.PrintToConsole();
+
+                round = SimulateBattle();
+
+                int endElves = dudes.Where(d => (d is Elf) && (d.HP > 0)).Count();
+
+                if (startElves == endElves)
+                    break;
+
+                elfAttackPower++;
+            }
+            while (true);
+
+            int sumHP = 0;
+
+            foreach (Dude dude in dudes)
+            {
+                if (dude.HP > 0)
+                    sumHP += dude.HP;
+            }
 
             return sumHP * round;
         }

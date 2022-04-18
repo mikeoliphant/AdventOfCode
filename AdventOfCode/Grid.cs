@@ -341,6 +341,11 @@
             }
         }
 
+        public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y)
+        {
+            return ValidNeighbors(x, y, includeDiagonal: false);
+        }
+
         public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
         {
             if (x > 0)
