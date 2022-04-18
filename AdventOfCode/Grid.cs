@@ -153,6 +153,17 @@
             return count;
         }
 
+        public IEnumerable<(int X, int Y)> GetAll()
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    yield return (x, y);
+                }
+            }
+        }
+
         public IEnumerable<T> GetAllValues()
         {
             for (int y = 0; y < Height; y++)
@@ -330,7 +341,7 @@
             }
         }
 
-        public IEnumerable<(int, int)> ValidNeighbors(int x, int y, bool includeDiagonal)
+        public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
         {
             if (x > 0)
                 yield return (x - 1, y);

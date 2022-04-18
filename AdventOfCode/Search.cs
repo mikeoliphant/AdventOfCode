@@ -27,6 +27,14 @@
 
         public bool GetShortestPath(T start, Func<T, bool> endCheck, out List<T> path, out float cost)
         {
+            if (endCheck(start))
+            {
+                path = new List<T>();
+                cost = 0;
+
+                return true;
+            }
+
             PriorityQueue<GraphEdge<T>, float> searchQueue = new PriorityQueue<GraphEdge<T>, float>();
             Dictionary<T, T> pred = new Dictionary<T, T>(); 
 
@@ -38,7 +46,7 @@
                 searchQueue.Enqueue(new GraphEdge<T> { From = start, To = neighbor.Key }, neighbor.Value);
             }
 
-            do
+            while (searchQueue.Count > 0)
             {
                 GraphEdge<T> toSearch;
 
@@ -75,7 +83,6 @@
                     }
                 }
             }
-            while (searchQueue.Count > 0);
 
             return false;
         }
