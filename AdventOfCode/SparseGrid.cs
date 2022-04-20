@@ -11,7 +11,7 @@
             DefaultValue = default(T);
         }
 
-        public T this[int index1, int index2]
+        public virtual T this[int index1, int index2]
         {
             get
             {
@@ -25,6 +25,21 @@
         }
 
         public int Count { get { return data.Count; } }
+
+        public SparseGrid<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
+        {
+            T[][] array = rows.Select(a => a.ToArray()).ToArray();
+
+            for (int y = 0; y < array.Length; y++)
+            {
+                for (int x = 0; x < array[0].Length; x++)
+                {
+                    data[(x, y)] = array[y][x];
+                }
+            }
+
+            return this;
+        }
 
         public bool TryGetValue(int index1, int index2, out T value)
         {
