@@ -11,6 +11,8 @@ namespace AdventOfCode
 {
     class VisualSparseGrid<T> : SparseGrid<T>
     {
+        public Dictionary<T, SKColor> Colors { get; set;  }
+
         Form form;
         SKControl control;
 
@@ -41,7 +43,16 @@ namespace AdventOfCode
 
             foreach (var pos in GetAll())
             {
-                canvas.DrawPoint(pos.X, pos.Y, SKColors.Black);
+                T value = data[pos];
+
+                if ((Colors != null) && Colors.ContainsKey(value))
+                {
+                    canvas.DrawPoint(pos.Y, pos.X, Colors[data[pos]]);
+                }
+                else
+                {
+                    canvas.DrawPoint(pos.Y, pos.X, SKColors.Black);
+                }
             }
 
             wait = false;

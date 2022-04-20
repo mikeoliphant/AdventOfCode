@@ -2,7 +2,7 @@
 {
     public class SparseGrid<T>
     {
-        Dictionary<ValueTuple<int, int>, T> data = new Dictionary<ValueTuple<int, int>, T>();
+        protected Dictionary<ValueTuple<int, int>, T> data = new Dictionary<ValueTuple<int, int>, T>();
 
         public T DefaultValue { get; set; }
 

@@ -1,16 +1,27 @@
-﻿namespace AdventOfCode._2018
+﻿using SkiaSharp;
+
+namespace AdventOfCode._2018
 {
     internal class Day17
     {
-        VisualSparseGrid<char> grid = new VisualSparseGrid<char>(1000, 1000);
+        VisualSparseGrid<char> grid = new VisualSparseGrid<char>(1845, 1000);
         Point waterSource = new Point(500, 0);
         int minX;
         int maxX;
         int minY;
         int maxY;
+        Stack<Point> flowPoints = new Stack<Point>();
+        Dictionary<Point, bool> deadPoints = new Dictionary<Point, bool>();
 
         void ReadInput()
         {
+            Dictionary<char, SKColor> colors = new Dictionary<char, SKColor>();
+            colors['~'] = SKColors.Blue;
+            colors['|'] = SKColors.LightBlue;
+            colors['*'] = SKColors.Red;
+
+            grid.Colors = colors;
+
             foreach (string line in File.ReadLines(@"C:\Code\AdventOfCode\Input\2018\Day17.txt"))
             {
                 string[] split = line.Split(", ");
@@ -75,6 +86,13 @@
 
         bool TrySettle(Point pos, int dx, out Point settlePos)
         {
+            if (deadPoints.ContainsKey(pos))
+            {
+                settlePos = Point.Empty;
+
+                return false;
+            }
+
             if (dx == 0)
             {
                 while (CanFlow(pos.X, pos.Y + 1))
@@ -86,6 +104,8 @@
                     if (pos.Y >= maxY)
                     {
                         settlePos = Point.Empty;
+
+                        deadPoints[pos] = true;
 
                         return false;
                     }
@@ -126,10 +146,14 @@
 
                 settlePos = Point.Empty;
 
+                deadPoints[pos] = true;
+
                 return false;
             }
             else
             {
+                Point startPos = pos;
+
                 while (CanFlow(pos.X + dx, pos.Y))
                 {
                     pos.X += dx;
@@ -138,8 +162,27 @@
 
                     if (CanFlow(pos.X, pos.Y + 1))
                     {
-                        return TrySettle(pos, 0, out settlePos);
+                        if (TrySettle(pos, 0, out settlePos))
+                        {
+                            //for (int x = startPos.X; x != (pos.X + dx); x += dx)
+                            //{
+                            //    grid[x, pos.Y] = '|';
+                            //}
+
+                            flowPoints.Push(pos);
+
+                            return true;
+                        }
+
+                        deadPoints[pos] = true;
+
+                        return false;
                     }
+
+                    //for (int x = startPos.X; x != (pos.X + dx); x += dx)
+                    //{
+                    //    grid[x, pos.Y] = '|';
+                    //}
                 }
 
                 settlePos = pos;
@@ -148,10 +191,8 @@
             }
         }
 
-        bool AddWater()
+        bool AddWater(Point pos)
         {
-            Point pos = waterSource;
-
             if (!CanFlow(pos.X, pos.Y))
             {
                 return false;
@@ -162,6 +203,13 @@
 
             grid[pos.X, pos.Y] = '~';
 
+            if ((grid.Count % 100) == 0)
+            {
+                grid.ReDraw();
+
+                //Thread.Sleep(100);
+            }
+
             return true;
         }
 
@@ -169,19 +217,33 @@
         {
             ReadInput();
 
+            flowPoints.Push(waterSource);
+
             do
             {
-                if (!AddWater())
+                if (flowPoints.Count == 0)
                     break;
 
-                grid.ReDraw();
+                Point pos = flowPoints.Peek();
+
+                if (!AddWater(pos))
+                {
+                    flowPoints.Pop();
+                }
 
                 //grid.PrintToConsole();
                 //Console.ReadLine();
             }
             while (true);
 
-            grid.PrintToConsole();
+            //foreach (var pos in deadPoints.Keys)
+            //{
+            //    grid[pos.X, pos.Y] = '*';
+            //}
+
+            grid.ReDraw();
+
+            //grid.PrintToConsole();
 
             return grid.GetAllValues().Count(g => (g == '~') || (g == '|'));
         }
