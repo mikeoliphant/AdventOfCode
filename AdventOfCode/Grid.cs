@@ -289,6 +289,11 @@
             return newGrid;
         }
 
+        public IEnumerable<T> AllNeighborValues(int x, int y)
+        {
+            return AllNeighborValues(x, y, includeDiagonal: false);
+        }
+
         public IEnumerable<T> AllNeighborValues(int x, int y, bool includeDiagonal)
         {
             yield return GetValue(x - 1, y);
@@ -303,6 +308,11 @@
                 yield return GetValue(x + 1, y - 1);
                 yield return GetValue(x + 1, y + 1);
             }
+        }
+
+        public IEnumerable<T> ValidNeighborValues(int x, int y)
+        {
+            return ValidNeighborValues(x, y, includeDiagonal: false);
         }
 
         public IEnumerable<T> ValidNeighborValues(int x, int y, bool includeDiagonal)
