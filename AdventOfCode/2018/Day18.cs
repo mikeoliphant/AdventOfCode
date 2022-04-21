@@ -2,62 +2,40 @@
 {
     internal class Day18
     {
-        Grid<char> grid = null;
+        Automata<char> automata = null;
 
         void ReadInput()
         {
-            grid = new Grid<char>().CreateDataFromRows(File.ReadLines(@"C:\Code\AdventOfCode\Input\2018\Day18.txt"));
-
+            automata = new Automata<char>(new Grid<char>().CreateDataFromRows(File.ReadLines(@"C:\Code\AdventOfCode\Input\2018\Day18.txt")));
+            automata.CellUpdateFuntion = UpdateCell;
         }
 
-        void Cycle()
+        char UpdateCell((int X, int Y) pos, char c)
         {
-            Grid<char> newGrid = new Grid<char>(grid.Width, grid.Height);
+            var neighbors = automata.Grid.ValidNeighborValues(pos.X, pos.Y, includeDiagonal: true);
 
-            foreach (var pos in grid.GetAll())
+            switch (c)
             {
-                char c = grid[pos.X, pos.Y];
+                case '.':
+                    if (neighbors.Count('|') > 2)
+                        return '|';
 
-                var neighbors = grid.ValidNeighborValues(pos.X, pos.Y, includeDiagonal: true);
+                    return '.';
 
-                switch (c)
-                {
-                    case '.':
-                        if (neighbors.Count('|') > 2)
-                        {
-                            newGrid[pos.X, pos.Y] = '|';
-                        }
-                        else
-                        {
-                            newGrid[pos.X, pos.Y] = '.';
-                        }
-                        break;
+                case '|':
+                    if (neighbors.Count('#') > 2)
+                        return '#';
 
-                    case '|':
-                        if (neighbors.Count('#') > 2)
-                        {
-                            newGrid[pos.X, pos.Y] = '#';
-                        }
-                        else
-                        {
-                            newGrid[pos.X, pos.Y] = '|';
-                        }
-                        break;
+                    return '|';
 
-                    case '#':
-                        if ((neighbors.Count('|') > 0) && (neighbors.Count(n => n == '#') > 0))
-                        {
-                            newGrid[pos.X, pos.Y] = '#';
-                        }
-                        else
-                        {
-                            newGrid[pos.X, pos.Y] = '.';
-                        }
-                        break;
-                }
+                case '#':
+                    if ((neighbors.Count('|') > 0) && (neighbors.Count(n => n == '#') > 0))
+                        return '#';
+
+                    return '.';
             }
 
-            grid = newGrid;
+            throw new InvalidOperationException();
         }
 
         public long Compute()
@@ -68,56 +46,33 @@
 
             for (int cycle = 0; cycle < 10; cycle++)
             {
-                Cycle();
+                automata.Cycle();
 
                 //grid.PrintToConsole();
             }
 
-            return grid.CountValue('|') * grid.CountValue('#');
+            return automata.Grid.CountValue('|') * automata.Grid.CountValue('#');
         }
 
         public long Compute2()
         {
-            Dictionary<long, long> history = new Dictionary<long, long>();
-
             ReadInput();
 
-            int histInARow = 0;
+            int cyclePos;
+            int loopSize;
 
-            //grid.PrintToConsole();
+            long maxCycle = 1000000000;
 
-            long maxCycle = 664; // 1000000000;
+            automata.FindLoop(100000, out cyclePos, out loopSize, delegate { return (int)automata.Grid.CountValue('|') * (int)automata.Grid.CountValue('#');  }, 100);
 
-            for (long cycle = 0; cycle < maxCycle; cycle++)
-            {
-                long resources = grid.CountValue('|') * grid.CountValue('#');
+            int offset = (int)(maxCycle - cyclePos) % loopSize;
 
-                if (history.ContainsKey(resources))
-                {
-                    histInARow++;
+            int dupeCycle = cyclePos + offset;
 
-                    if (histInARow == 100)
-                    {
-                        long loopSize = cycle - history[resources];
+            automata.Reset();
+            automata.Cycle(dupeCycle);
 
-                        long offset = (maxCycle - cycle) % loopSize;
-
-                        long dupeCycle = cycle + offset;
-                    }
-                }
-                else
-                {
-                    histInARow = 0;
-                }
-
-                history[resources] = cycle;
-
-                Cycle();
-
-                //grid.PrintToConsole();
-            }
-
-            return grid.CountValue('|') * grid.CountValue('#');
+            return automata.Grid.CountValue('|') * automata.Grid.CountValue('#');
         }
     }
 }

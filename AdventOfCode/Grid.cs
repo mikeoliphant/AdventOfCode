@@ -82,6 +82,11 @@
             }
         }
 
+        public virtual GridBase<T> CloneEmpty()
+        {
+            return Activator.CreateInstance(typeof(T)) as GridBase<T>;
+        }
+
         public bool MatchesPattern(Grid<T> patternGrid, int xOffset, int yOffset, T wildcard)
         {
             for (int y = 0; y < patternGrid.Height; y++)
@@ -303,6 +308,11 @@
             value = data[x, y];
 
             return true;
+        }
+
+        public override GridBase<T> CloneEmpty()
+        {
+            return new Grid<T>(Width, Height);
         }
 
         public override IEnumerable<(int X, int Y)> GetAll()
