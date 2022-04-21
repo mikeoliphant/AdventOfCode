@@ -37,6 +37,9 @@ namespace AdventOfCode
 
         private void Control_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
+            if (!wait)
+                return;
+
             SKCanvas canvas = e.Surface.Canvas;
 
             canvas.Clear(SKColors.White);

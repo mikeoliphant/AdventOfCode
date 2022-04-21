@@ -10,8 +10,6 @@ namespace AdventOfCode._2018
         int maxX;
         int minY;
         int maxY;
-        Stack<Point> flowPoints = new Stack<Point>();
-        Dictionary<Point, bool> deadPoints = new Dictionary<Point, bool>();
 
         void ReadInput()
         {
@@ -81,17 +79,28 @@ namespace AdventOfCode._2018
                 return true;
             }
 
-            return (c == '|') || (c == ' ') || (c == '+');
+            return (c == ' ') || (c == '|');
         }
 
-        bool TrySettle(Point pos, int dx, out Point settlePos)
+        bool IsStream(int x, int y)
         {
-            if (deadPoints.ContainsKey(pos))
-            {
-                settlePos = Point.Empty;
+            char c;
 
+            if (!grid.TryGetValue(x, y, out c))
+            {
                 return false;
             }
+
+            return (c == '|');
+        }
+
+        int skip = 0;
+
+        bool PushWater(Point startPos, int dx, out Point pos)
+        {
+            pos = startPos;
+
+            grid[pos.X, pos.Y] = '|';
 
             if (dx == 0)
             {
@@ -99,115 +108,65 @@ namespace AdventOfCode._2018
                 {
                     pos.Y++;
 
-                    grid[pos.X, pos.Y] = '|';
-
-                    if (pos.Y >= maxY)
+                    if (IsStream(pos.X, pos.Y))
                     {
-                        settlePos = Point.Empty;
-
-                        deadPoints[pos] = true;
-
                         return false;
                     }
+
+                    if (pos.Y > maxY)
+                    {
+                        return false;
+                    }
+
+                    grid[pos.X, pos.Y] = '|';
                 }
 
-                Point leftPos;
-                Point rightPos;
-
-                bool settleLeft = TrySettle(pos, -1, out leftPos);
-                bool settleRight = TrySettle(pos, 1, out rightPos);
-
-                if (settleLeft && settleRight)
+                do
                 {
-                    if ((leftPos.Y < rightPos.Y) || ((leftPos.Y == rightPos.Y) && (Math.Abs(leftPos.X - pos.X)) > Math.Abs(rightPos.X - pos.X)))
+                    Point leftPos;
+                    Point rightPos;
+
+                    bool pushLeft = PushWater(pos, -1, out leftPos);
+                    bool pushRight = PushWater(pos, 1, out rightPos);
+
+                    if (pushLeft && pushRight)
                     {
-                        settlePos = leftPos;
+                        for (int x = leftPos.X; x <= rightPos.X; x++)
+                        {
+                            grid[x, pos.Y] = '~';
+                        }
+
+                        if ((skip++ % 100) == 0)
+                            grid.ReDraw();
                     }
                     else
                     {
-                        settlePos = rightPos;
-                    }
-
-                    return true;
-                }
-
-                if (settleLeft && (leftPos.Y > pos.Y))
-                {
-                    settlePos = leftPos;
-
-                    return true;
-                }
-                else if (settleRight && (rightPos.Y > pos.Y))
-                {
-                    settlePos = rightPos;
-
-                    return true;
-                }
-
-                settlePos = Point.Empty;
-
-                deadPoints[pos] = true;
-
-                return false;
-            }
-            else
-            {
-                Point startPos = pos;
-
-                while (CanFlow(pos.X + dx, pos.Y))
-                {
-                    pos.X += dx;
-
-                    grid[pos.X, pos.Y] = '|';
-
-                    if (CanFlow(pos.X, pos.Y + 1))
-                    {
-                        if (TrySettle(pos, 0, out settlePos))
-                        {
-                            //for (int x = startPos.X; x != (pos.X + dx); x += dx)
-                            //{
-                            //    grid[x, pos.Y] = '|';
-                            //}
-
-                            flowPoints.Push(pos);
-
-                            return true;
-                        }
-
-                        deadPoints[pos] = true;
-
                         return false;
                     }
 
-                    //for (int x = startPos.X; x != (pos.X + dx); x += dx)
-                    //{
-                    //    grid[x, pos.Y] = '|';
-                    //}
+                    pos.Y--;
                 }
-
-                settlePos = pos;
+                while ((pos.Y >= startPos.Y) && !CanFlow(pos.X, pos.Y + 1));
 
                 return true;
             }
-        }
 
-        bool AddWater(Point pos)
-        {
-            if (!CanFlow(pos.X, pos.Y))
+            while (CanFlow(pos.X + dx, pos.Y))
             {
-                return false;
-            }
+                pos.X += dx;
 
-            if (!TrySettle(pos, 0, out pos))
-                return false;
+                if (IsStream(pos.X, pos.Y))
+                    return false;
 
-            grid[pos.X, pos.Y] = '~';
+                grid[pos.X, pos.Y] = '|';
 
-            if ((grid.Count % 100) == 0)
-            {
-                grid.ReDraw();
-
-                //Thread.Sleep(100);
+                if (CanFlow(pos.X, pos.Y + 1))
+                {
+                    if (!PushWater(new Point(pos.X, pos.Y + 1), 0, out pos))
+                    {
+                        return false;
+                    }
+                }
             }
 
             return true;
@@ -217,35 +176,21 @@ namespace AdventOfCode._2018
         {
             ReadInput();
 
-            flowPoints.Push(waterSource);
+            Point pos;
 
-            do
-            {
-                if (flowPoints.Count == 0)
-                    break;
+            int startY = waterSource.Y + 1;
 
-                Point pos = flowPoints.Peek();
+            if (startY < minY)
+                startY = minY;
 
-                if (!AddWater(pos))
-                {
-                    flowPoints.Pop();
-                }
-
-                //grid.PrintToConsole();
-                //Console.ReadLine();
-            }
-            while (true);
-
-            //foreach (var pos in deadPoints.Keys)
-            //{
-            //    grid[pos.X, pos.Y] = '*';
-            //}
+            PushWater(new Point(waterSource.X, startY), 0, out pos);
 
             grid.ReDraw();
 
             //grid.PrintToConsole();
 
-            return grid.GetAllValues().Count(g => (g == '~') || (g == '|'));
+            //return grid.GetAllValues().Count(g => (g == '~') || (g == '|'));
+            return grid.GetAllValues().Count(g => (g == '~'));
         }
 
     }
