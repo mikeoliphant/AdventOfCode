@@ -68,8 +68,24 @@
 
             R[0] = 1;
 
+            int waitFor = -1;
+            int run = 0;
+
+            //
+            // Key is that the program is running two loops up to 10551287
+            //
+            // Register 0 gets written to if loop1 var * loop2 var == 10551287
+            //
+            // Only a few factors, so I solved it manually
+            //
+            // 83081 * 127
+            // 42037 * 251
+            // 31877 * 331
+
             do
             {
+                int lastInstruction = instructionPointer;
+
                 R[instructionRegister] = instructionPointer;
 
                 Instruction inst = instructions[instructionPointer];
@@ -83,15 +99,70 @@
                 if (instructionPointer >= instructions.Count)
                     break;
 
-                //if (R[5] == (10551287 - 1))
-                //{
-
-                //}
-
-                if (R[5] == 3)
+                if (run > 0)
                 {
-                    R[5] = 10551287 - 3;
+                    run--;
+                    continue;
                 }
+
+                if (waitFor != -1)
+                {
+                    if (inst.Args[2] != waitFor)
+                        continue;
+
+                    waitFor = -1;
+                }
+
+                do
+                {
+                    Console.WriteLine();
+                    Console.WriteLine(lastInstruction + ": " + inst.Opcode + " " + String.Join(' ', inst.Args));
+                    Console.WriteLine();
+
+                    for (int r = 0; r < R.Length; r++)
+                    {
+                        Console.Write("[" + r + "] " + R[r]);
+
+                        if (inst.Args[2] == r)
+                            Console.Write(" < ");
+
+                        Console.WriteLine();
+                    }
+
+                    Console.WriteLine();
+                    Console.Write("> ");
+
+                    string cmd = Console.ReadLine();
+
+                    if (cmd.StartsWith("run"))
+                    {
+                        run = int.Parse(cmd.Substring(4));
+                    }
+                    if (cmd.StartsWith("wait"))
+                    {
+                        waitFor = int.Parse(cmd.Substring(5));
+
+                        if ((waitFor < 0) | (waitFor > (R.Length - 1)))
+                        {
+                            Console.WriteLine("Bad register");
+
+                            waitFor = -1;
+                        }
+
+                        break;
+                    }
+                    else if (cmd.StartsWith("set"))
+                    {
+                        int[] args = cmd.Substring(4).ToInts(' ').ToArray();
+
+                        R[args[0]] = args[1];
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                while (true);
             }
             while (true);
 
