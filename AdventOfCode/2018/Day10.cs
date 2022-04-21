@@ -38,7 +38,7 @@
                 {
                     char c;
 
-                    if (grid.GetValidNeighbors(pos.X, pos.Y).Any())
+                    if (grid.ValidNeighbors(pos.X, pos.Y).Any())
                         numContiguous++;
                 }
 

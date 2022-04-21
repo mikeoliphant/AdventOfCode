@@ -49,7 +49,7 @@
 
             grid.PrintToConsole();
 
-            return grid.Count('#');
+            return grid.CountValue('#');
         }
 
         public long Compute2()

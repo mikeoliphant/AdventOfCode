@@ -1,64 +1,58 @@
 ﻿namespace AdventOfCode
 {
-    public class Grid<T> : IEquatable<Grid<T>>
+    public class GridBase<T> : IEquatable<Grid<T>>
     {
-        public int Width { get { return data.GetLength(0); } }
-        public int Height { get { return data.GetLength(1); } }
+        public T DefaultValue { get; set; }
 
-        public T InvalidValue { get; set; }
-
-        T[,] data;
-
-        public Grid()
+        public GridBase()
         {
-            InvalidValue = default(T);
+            DefaultValue = default(T);
         }
 
-        public Grid(int width, int height)
-            : this()
-        {
-            data = new T[width, height];
-        }
-
-        public Grid(Grid<T> srcGrid)
-        {
-            data = new T[srcGrid.Width, srcGrid.Height];
-
-            Copy(srcGrid, this);
-        }
-
-        public T this[int index1, int index2]
+        public virtual T this[int index1, int index2]
         {
             get
             {
-                return data[index1, index2];
+                throw new NotImplementedException();
             }
 
             set
             {
-                data[index1, index2] = value;
+                throw new NotImplementedException();
             }
         }
 
-        public T GetValue(int x, int y)
+        public virtual T this[(int X, int Y) pos]
         {
-            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
-                return InvalidValue;
+            get
+            {
+                return this[pos.X, pos.Y];
+            }
 
-            return data[x, y];
-        }
-
-        public void SetValue(int x, int y, T value)
-        {
-            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
-                return;
-
-            data[x, y] = value;
+            set
+            {
+                this[pos.X, pos.Y] = value;
+            }
         }
 
         public virtual bool Equals(Grid<T> other)
         {
             return this.GetAllValues().SequenceEqual(other.GetAllValues());
+        }
+
+        public virtual T GetValue(int x, int y)
+        {
+            return this[x, y];
+        }
+
+        public virtual bool TryGetValue(int x, int y, out T value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void SetValue(int x, int y, T value)
+        {
+            this[x, y] = value;
         }
 
         public static void Copy(Grid<T> src, Grid<T> dest)
@@ -104,56 +98,214 @@
 
         public void Fill(T value)
         {
-            for (int y = 0; y < Height; y++)
+            foreach (var pos in GetAll())
             {
-                for (int x = 0; x < Width; x++)
-                {
-                    data[x, y] = value;
-                }
+                this[pos.X, pos.Y] = value;
             }
         }
 
         public void Replace(T src, T dest)
         {
-            for (int y = 0; y < Height; y++)
+            foreach (var pos in GetAll())
             {
-                for (int x = 0; x < Width; x++)
-                {
-                    if (data[x, y].Equals(src))
-                        data[x, y] = dest;
-                }
+                if (this[pos.X, pos.Y].Equals(src))
+                    this[pos.X, pos.Y] = dest;
             }
         }
 
-        public IEnumerable<ValueTuple<int, int>> Find(T value)
+        public IEnumerable<(int X, int Y)> FindValue(T value)
         {
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    if (data[x, y].Equals(value))
-                        yield return (x, y);
-                }
-            }
+            return GetAll().Where(g => this[g.X, g.Y].Equals(value));
         }
 
-        public long Count(T value)
+        public long CountValue(T value)
         {
-            long count = 0;
-
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    if (data[x, y].Equals(value))
-                        count++;
-                }
-            }
-
-            return count;
+            return GetAllValues().Where(v => v.Equals(value)).LongCount();
         }
 
-        public IEnumerable<(int X, int Y)> GetAll()
+        public virtual IEnumerable<(int X, int Y)> GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual IEnumerable<T> GetAllValues()
+        {
+            foreach (var pos in GetAll())
+            {
+                yield return this[pos.X, pos.Y];
+            }
+        }
+
+        public IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    yield return (x, y);
+                }
+            }
+        }
+
+        public IEnumerable<T> GetAllRectangleValues(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    yield return this[x, y];
+                }
+            }
+        }
+
+        public IEnumerable<T> GetValidRectangleValues(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    T value;
+
+                    if (TryGetValue(x, y, out value))
+                        yield return value;
+                }
+            }
+        }
+
+        public IEnumerable<T> GetWindowValues(int x, int y, int size, bool includeSelf)
+        {
+            for (int dy = -size; dy <= size; dy++)
+            {
+                for (int dx = -size; dx <= size; dx++)
+                {
+                    if (includeSelf || (dx != 0 && dy != 0))
+                    {
+                        yield return GetValue(x + dx, y + dy);
+                    }
+                }
+            }
+        }
+
+        public IEnumerable<T> AllNeighborValues(int x, int y)
+        {
+            return AllNeighborValues(x, y, includeDiagonal: false);
+        }
+
+        public IEnumerable<T> AllNeighborValues(int x, int y, bool includeDiagonal)
+        {
+            yield return GetValue(x - 1, y);
+            yield return GetValue(x + 1, y);
+            yield return GetValue(x, y - 1);
+            yield return GetValue(x, y + 1);
+
+            if (includeDiagonal)
+            {
+                yield return GetValue(x - 1, y - 1);
+                yield return GetValue(x - 1, y + 1);
+                yield return GetValue(x + 1, y - 1);
+                yield return GetValue(x + 1, y + 1);
+            }
+        }
+
+        public IEnumerable<T> ValidNeighborValues(int x, int y)
+        {
+            return ValidNeighborValues(x, y, includeDiagonal: false);
+        }
+
+        public virtual IEnumerable<T> ValidNeighborValues(int x, int y, bool includeDiagonal)
+        {
+            return ValidNeighbors(x, y, includeDiagonal).Select(n => this[n.X, n.Y]);
+        }
+
+        public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y)
+        {
+            return ValidNeighbors(x, y, includeDiagonal: false);
+        }
+
+        public virtual IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual GridBase<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void PrintToConsole()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class Grid<T> : GridBase<T>
+    {
+        public int Width { get { return data.GetLength(0); } }
+        public int Height { get { return data.GetLength(1); } }
+
+        T[,] data;
+
+        public Grid()
+            : base()
+        {
+
+        }
+
+        public Grid(int width, int height)
+            : base()
+        {
+            data = new T[width, height];
+        }
+
+        public Grid(Grid<T> srcGrid)
+        {
+            data = new T[srcGrid.Width, srcGrid.Height];
+
+            Copy(srcGrid, this);
+        }
+
+        public override T this[int index1, int index2]
+        {
+            get
+            {
+                return data[index1, index2];
+            }
+
+            set
+            {
+                data[index1, index2] = value;
+            }
+        }
+
+        public override T GetValue(int x, int y)
+        {
+            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
+                return DefaultValue;
+
+            return data[x, y];
+        }
+
+        public override void SetValue(int x, int y, T value)
+        {
+            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
+                return;
+
+            data[x, y] = value;
+        }
+
+        public override bool TryGetValue(int x, int y, out T value)
+        {
+            value = default(T);
+
+            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
+                return false;
+
+            value = data[x, y];
+
+            return true;
+        }
+
+        public override IEnumerable<(int X, int Y)> GetAll()
         {
             for (int y = 0; y < Height; y++)
             {
@@ -164,7 +316,7 @@
             }
         }
 
-        public IEnumerable<T> GetAllValues()
+        public override IEnumerable<T> GetAllValues()
         {
             for (int y = 0; y < Height; y++)
             {
@@ -188,42 +340,6 @@
             for (int y = 0; y < Height; y++)
             {
                 yield return data[col, y];
-            }
-        }
-
-        public IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
-        {
-            for (int y = rect.Top; y < rect.Bottom; y++)
-            {
-                for (int x = rect.X; x < rect.Right; x++)
-                {
-                    yield return (x, y);
-                }
-            }
-        }
-
-        public IEnumerable<T> GetRectangleValues(Rectangle rect)
-        {
-            for (int y = rect.Top; y < rect.Bottom; y++)
-            {
-                for (int x = rect.X; x < rect.Right; x++)
-                {
-                    yield return data[x, y];
-                }
-            }
-        }
-
-        public IEnumerable<T> GetWindowValues(int x, int y, int size, bool includeSelf)
-        {
-            for (int dy = -size; dy <= size; dy++)
-            {
-                for (int dx = -size; dx <= size; dx++)
-                {
-                    if (includeSelf || (dx != 0 && dy != 0))
-                    {
-                        yield return GetValue(x + dx, y + dy);
-                    }
-                }
             }
         }
 
@@ -289,74 +405,7 @@
             return newGrid;
         }
 
-        public IEnumerable<T> AllNeighborValues(int x, int y)
-        {
-            return AllNeighborValues(x, y, includeDiagonal: false);
-        }
-
-        public IEnumerable<T> AllNeighborValues(int x, int y, bool includeDiagonal)
-        {
-            yield return GetValue(x - 1, y);
-            yield return GetValue(x + 1, y);
-            yield return GetValue(x, y - 1);
-            yield return GetValue(x, y + 1);
-
-            if (includeDiagonal)
-            {
-                yield return GetValue(x - 1, y - 1);
-                yield return GetValue(x - 1, y + 1);
-                yield return GetValue(x + 1, y - 1);
-                yield return GetValue(x + 1, y + 1);
-            }
-        }
-
-        public IEnumerable<T> ValidNeighborValues(int x, int y)
-        {
-            return ValidNeighborValues(x, y, includeDiagonal: false);
-        }
-
-        public IEnumerable<T> ValidNeighborValues(int x, int y, bool includeDiagonal)
-        {
-            if (x > 0)
-                yield return GetValue(x - 1, y);
-
-            if (x < (Width - 1))
-                yield return GetValue(x + 1, y);
-
-            if (y > 0)
-                yield return GetValue(x, y - 1);
-
-            if (y < (Height - 1))
-                yield return GetValue(x, y + 1);
-
-            if (includeDiagonal)
-            {
-                if (x > 0)
-                {
-                    if (y > 0)
-                        yield return GetValue(x - 1, y - 1);
-
-                    if (y < (Height - 1))
-                        yield return GetValue(x - 1, y + 1);
-                }
-
-                if (x < (Width - 1))
-                {
-                    if (y > 0)
-                        yield return GetValue(x + 1, y - 1);
-
-                    if (y < (Height - 1))
-                        yield return GetValue(x + 1, y + 1);
-                }
-            }
-        }
-
-        public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y)
-        {
-            return ValidNeighbors(x, y, includeDiagonal: false);
-        }
-
-        public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
+        public override IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
         {
             if (x > 0)
                 yield return (x - 1, y);
@@ -399,7 +448,7 @@
             return this;
         }
 
-        public Grid<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
+        public override Grid<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
         {
             T[][] array = rows.Select(a => a.ToArray()).ToArray();
 
@@ -416,7 +465,7 @@
             return this;
         }
 
-        public void PrintToConsole()
+        public override void PrintToConsole()
         {
             for (int y = 0; y < Height; y++)
             {
@@ -430,5 +479,154 @@
 
             Console.WriteLine();
         }
+    }
+
+    public class SparseGrid<T> : GridBase<T>
+    {
+        protected Dictionary<ValueTuple<int, int>, T> data = new Dictionary<ValueTuple<int, int>, T>();
+
+
+        public SparseGrid()
+            : base()
+        {
+        }
+
+        public override T this[int index1, int index2]
+        {
+            get
+            {
+                return data[(index1, index2)];
+            }
+
+            set
+            {
+                data[(index1, index2)] = value;
+            }
+        }
+
+        public override T this[(int X, int Y) pos]
+        {
+            get
+            {
+                return data[pos];
+            }
+
+            set
+            {
+                data[pos] = value;
+            }
+        }
+
+        public int Count { get { return data.Count; } }
+
+        public override SparseGrid<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
+        {
+            T[][] array = rows.Select(a => a.ToArray()).ToArray();
+
+            for (int y = 0; y < array.Length; y++)
+            {
+                for (int x = 0; x < array[0].Length; x++)
+                {
+                    data[(x, y)] = array[y][x];
+                }
+            }
+
+            return this;
+        }
+
+        public override bool TryGetValue(int index1, int index2, out T value)
+        {
+            ValueTuple<int, int> t = (index1, index2);
+
+            if (data.ContainsKey(t))
+            {
+                value = data[t];
+
+                return true;
+            }
+
+            value = DefaultValue;
+
+            return false;
+        }
+
+        public override IEnumerable<(int X, int Y)> GetAll()
+        {
+            return data.Keys;
+        }
+
+        public override IEnumerable<T> GetAllValues()
+        {
+            return data.Values;
+        }
+
+        public void GetBounds(out int minX, out int minY, out int maxX, out int maxY)
+        {
+            minX = int.MaxValue;
+            maxX = int.MinValue;
+            minY = int.MaxValue;
+            maxY = int.MinValue;
+
+            foreach (ValueTuple<int, int> t in data.Keys)
+            {
+                minX = Math.Min(minX, t.Item1);
+                maxX = Math.Max(maxX, t.Item1);
+                minY = Math.Min(minY, t.Item2);
+                maxY = Math.Max(maxY, t.Item2);
+            }
+        }
+
+        public override void PrintToConsole()
+        {
+            int minX;
+            int maxX;
+            int minY;
+            int maxY;
+
+            GetBounds(out minX, out minY, out maxX, out maxY);
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    T value;
+
+                    TryGetValue(x, y, out value);
+
+                    Console.Write(value);
+                }
+
+                Console.WriteLine();
+            }
+        }
+
+        public Grid<T> ToGrid()
+        {
+            int minX;
+            int maxX;
+            int minY;
+            int maxY;
+
+            GetBounds(out minX, out minY, out maxX, out maxY);
+
+            int width = maxX - minX + 1;
+            int height = maxY - minY + 1;
+
+            Grid<T> grid = new Grid<T>(width, height);
+
+            T value = DefaultValue;
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (TryGetValue(x, y, out value))
+                        grid[x - minX, y - minY] = value;
+                }
+            }
+
+            return grid;
+        }
+
     }
 }

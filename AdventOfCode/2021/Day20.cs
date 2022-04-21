@@ -27,7 +27,7 @@
 
             image = expandedImage;
 
-            image.InvalidValue = invalidValue;
+            image.DefaultValue = invalidValue;
 
             invalidValue = (invalidValue == '.') ? '#' : '.';
 

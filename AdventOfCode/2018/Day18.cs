@@ -73,7 +73,7 @@
                 //grid.PrintToConsole();
             }
 
-            return grid.Count('|') * grid.Count('#');
+            return grid.CountValue('|') * grid.CountValue('#');
         }
 
         public long Compute2()
@@ -90,7 +90,7 @@
 
             for (long cycle = 0; cycle < maxCycle; cycle++)
             {
-                long resources = grid.Count('|') * grid.Count('#');
+                long resources = grid.CountValue('|') * grid.CountValue('#');
 
                 if (history.ContainsKey(resources))
                 {
@@ -117,7 +117,7 @@
                 //grid.PrintToConsole();
             }
 
-            return grid.Count('|') * grid.Count('#');
+            return grid.CountValue('|') * grid.CountValue('#');
         }
     }
 }

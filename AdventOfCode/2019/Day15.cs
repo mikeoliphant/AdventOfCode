@@ -96,6 +96,40 @@
         }
 
 
+        char blocker;
+
+        IEnumerable<KeyValuePair<ValueTuple<int, int>, float>> GetUnblockedNeighbors(ValueTuple<int, int> position)
+        {
+            ValueTuple<int, int> north = (position.Item1, position.Item2 - 1);
+
+            if (!grid[north].Equals(blocker))
+                yield return new KeyValuePair<(int, int), float>(north, 1);
+
+            ValueTuple<int, int> south = (position.Item1, position.Item2 + 1);
+
+            if (!grid[south].Equals(blocker))
+                yield return new KeyValuePair<(int, int), float>(south, 1);
+
+            ValueTuple<int, int> west = (position.Item1 - 1, position.Item2);
+
+            if (!grid[west].Equals(blocker))
+                yield return new KeyValuePair<(int, int), float>(west, 1);
+
+            ValueTuple<int, int> east = (position.Item1 + 1, position.Item2);
+
+            if (!grid[east].Equals(blocker))
+                yield return new KeyValuePair<(int, int), float>(east, 1);
+        }
+
+        public bool DijkstraSearch(int startX, int startY, int endX, int endY, char blocker, out List<ValueTuple<int, int>> path, out float cost)
+        {
+            this.blocker = blocker;
+
+            DijkstraSearch<ValueTuple<int, int>> search = new DijkstraSearch<ValueTuple<int, int>>(GetUnblockedNeighbors);
+
+            return search.GetShortestPath((startX, startY), (endX, endY), out path, out cost);
+        }
+
         public long Compute()
         {
             ReadInput();
@@ -105,7 +139,7 @@
             List<ValueTuple<int, int>> path;
             float cost;
 
-            if (grid.DijkstraSearch(0, 0, goalX, goalY, '#', out path, out cost))
+            if (DijkstraSearch(0, 0, goalX, goalY, '#', out path, out cost))
             {
                 return (int)cost;
             }

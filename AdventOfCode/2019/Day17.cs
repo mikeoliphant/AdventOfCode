@@ -140,7 +140,7 @@
 
             grid.PrintToConsole();
 
-            var startPos = grid.Find('^').First();
+            var startPos = grid.FindValue('^').First();
 
             var path = GetPath(startPos.Item1, startPos.Item2, 0, -1);
 

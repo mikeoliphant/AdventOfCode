@@ -11,7 +11,7 @@
 
             for (int i = 0; i < 26; i++)
             {
-                if (!grid.Find((char)('a' + i)).Any())
+                if (!grid.FindValue((char)('a' + i)).Any())
                     break;
 
                 allKeys |= 1 << i;
@@ -50,7 +50,7 @@
 
             grid.PrintToConsole();
 
-            (int X, int Y) startPos = grid.Find('@').First();
+            (int X, int Y) startPos = grid.FindValue('@').First();
 
             DijkstraSearch<(int, int, int)> search = new DijkstraSearch<(int, int, int)>(GetNeighbors);
 
@@ -106,7 +106,7 @@
         {
             ReadInput();
 
-            (int X, int Y) startPos = grid.Find('@').First();
+            (int X, int Y) startPos = grid.FindValue('@').First();
 
             grid[startPos.X, startPos.Y] = '#';
 
@@ -120,7 +120,7 @@
             grid[startPos.X + 1, startPos.Y - 1] = '@';
             grid[startPos.X + 1, startPos.Y + 1] = '@';
 
-            robotPositions = grid.Find('@').ToArray();
+            robotPositions = grid.FindValue('@').ToArray();
 
             grid.PrintToConsole();
 
