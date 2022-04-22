@@ -191,6 +191,27 @@
             }
         }
 
+        public IEnumerable<(int X, int Y)> AllNeighbors(int x, int y)
+        {
+            return AllNeighbors(x, y, includeDiagonal: false);
+        }
+
+        public IEnumerable<(int X, int Y)> AllNeighbors(int x, int y, bool includeDiagonal)
+        {
+            yield return (x - 1, y);
+            yield return (x + 1, y);
+            yield return (x, y - 1);
+            yield return (x, y + 1);
+
+            if (includeDiagonal)
+            { 
+                yield return (x - 1, y - 1);
+                yield return (x - 1, y + 1);
+                yield return (x + 1, y - 1);
+                yield return (x + 1, y + 1);
+            }
+        }
+
         public IEnumerable<T> AllNeighborValues(int x, int y)
         {
             return AllNeighborValues(x, y, includeDiagonal: false);
@@ -229,7 +250,7 @@
 
         public virtual IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
         {
-            throw new NotImplementedException();
+            return AllNeighbors(x, y, includeDiagonal);
         }
 
         public virtual GridBase<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
@@ -608,6 +629,8 @@
 
                 Console.WriteLine();
             }
+
+            Console.WriteLine();
         }
 
         public Grid<T> ToGrid()
