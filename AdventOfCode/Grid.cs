@@ -591,6 +591,19 @@
             return data.Values;
         }
 
+        public override IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
+        {
+            foreach (var pos in AllNeighbors(x, y, includeDiagonal))
+            {
+                T val = DefaultValue;
+
+                if (TryGetValue(pos.X, pos.Y, out val))
+                {
+                    yield return pos;
+                }
+            }
+        }
+
         public void GetBounds(out int minX, out int minY, out int maxX, out int maxY)
         {
             minX = int.MaxValue;
