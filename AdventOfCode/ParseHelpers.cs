@@ -47,6 +47,11 @@
             return from floatStr in input select float.Parse(floatStr);
         }
 
+        public static IEnumerable<float> ToFloats(this string input, char delimeter)
+        {
+            return input.Split(delimeter).ToFloats();
+        }
+
         public static IEnumerable<float> ToFloats(this string input, string delimeter)
         {
             return input.Split(delimeter).ToFloats();

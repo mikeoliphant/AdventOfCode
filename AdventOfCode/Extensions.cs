@@ -7,6 +7,11 @@
             return Math.Abs(p1.X - p2.X) + Math.Abs(p1.Y - p2.Y);
         }
 
+        public static float ManhattanDistance(this Vector3 p1, Vector3 p2)
+        {
+            return Math.Abs(p1.X - p2.X) + Math.Abs(p1.Y - p2.Y) + Math.Abs(p1.Z - p2.Z);
+        }
+
 
         public static LinkedListNode<T> MoveCircular<T>(this LinkedListNode<T> node, int move)
         {
