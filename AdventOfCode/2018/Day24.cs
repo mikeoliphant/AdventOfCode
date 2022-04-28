@@ -126,9 +126,12 @@
                 {
                     ArmyGroup attack = otherArmy.OrderByDescending(g => armyGroup.DamageTo(g)).ThenByDescending(g => g.Power).ThenByDescending(g => g.Initiative).First();
 
-                    toAttack[armyGroup] = attack;
+                    if (armyGroup.DamageTo(attack) > 0)
+                    {
+                        toAttack[armyGroup] = attack;
 
-                    otherArmy.Remove(attack);
+                        otherArmy.Remove(attack);
+                    }
 
                     if (otherArmy.Count == 0)
                         break;
@@ -169,7 +172,7 @@
 
         public long Compute2()
         {
-            immuneBoost = 60;
+            immuneBoost = 61;
 
             do
             {
