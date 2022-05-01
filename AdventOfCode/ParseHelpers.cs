@@ -12,6 +12,11 @@
             return input.TrimEnd().Split(new string[] { "\r\n\r\n", "\r\r", "\n\n" }, StringSplitOptions.None);
         }
 
+        public static string[] SplitWhitespace(this string input)
+        {
+            return input.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
         public static IEnumerable<int> ToInts(this string input, char delimeter)
         {
             return from intStr in input.Split(delimeter) select int.Parse(intStr);
