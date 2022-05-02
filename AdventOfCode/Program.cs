@@ -13,11 +13,9 @@ namespace AdventOfCode
 {
     class Program
     {
-        static Thread runThread = null;
-
         static void Main(string[] args)
         {
-            long result = new AdventOfCode._2017.Day6().Compute();
+            long result = new AdventOfCode._2017.Day7().Compute();
         }
     }
 }
