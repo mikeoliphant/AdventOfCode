@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode
 {
-    class LongVec3
+    struct LongVec3 : IEquatable<LongVec3>
     {
         public long X { get; set; }
         public long Y { get; set; }
@@ -33,6 +33,21 @@
         public long ManhattanDistance(LongVec3 other)
         {
             return Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
+        }
+
+        public bool Equals(LongVec3 other)
+        {
+            return (X == other.X) && (Y == other.Y) && (Z == other.Z);
+        }
+
+        public static bool operator ==(LongVec3 v1, LongVec3 v2)
+        {
+            return v1.Equals(v2);
+        }
+
+        public static bool operator !=(LongVec3 v1, LongVec3 v2)
+        {
+            return v1 != v2;
         }
 
         public static LongVec3 operator +(LongVec3 a, LongVec3 b) => new LongVec3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
