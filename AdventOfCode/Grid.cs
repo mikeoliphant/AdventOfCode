@@ -401,6 +401,53 @@
             throw new ArgumentException("'rotation' must be 0-3");
         }
 
+        static bool[] bools = new bool[] { true, false };
+
+        public bool MatchSquareWithTransforms(int subX, int subY, Grid<T> toMatch, out int rotation, out bool flipX, out bool flipY)
+        {
+            foreach (bool fx in bools)
+            {
+                foreach (bool fy in bools)
+                {
+                    for (int rot = 0; rot < 4; rot++)
+                    {
+                        bool isMatch = true;
+
+                        for (int y = 0; y < toMatch.Height; y++)
+                        {
+                            for (int x = 0; x < toMatch.Width; x++)
+                            {
+                                if (!toMatch.GetTransformedValue(x, y, rot, fx, fy).Equals(GetValue(subX + x, subY + y)))
+                                {
+                                    isMatch = false;
+
+                                    break;
+                                }                               
+                            }
+
+                            if (!isMatch)
+                                break;
+                        }
+
+                        if (isMatch)
+                        {
+                            flipX = fx;
+                            flipY = fy;
+                            rotation = rot;
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            rotation = 0;
+            flipX = false;
+            flipY = false;
+
+            return false;
+        }
+
         public IEnumerable<T> GetEdge(int edge)
         {
             switch (edge)
