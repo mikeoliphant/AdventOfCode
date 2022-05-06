@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode
 {
-    public static class CollectionHelpers
+    public static class CollectionHelper
     {
         public static int Count<T>(this IEnumerable<T> input, T value)
         {

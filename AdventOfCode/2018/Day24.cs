@@ -60,7 +60,7 @@
 
             armies = new List<ArmyGroup>[2];
 
-            foreach (string armyStr in ParseHelpers.SplitParagraphs(File.ReadAllText(@"C:\Code\AdventOfCode\Input\2018\Day24.txt")))
+            foreach (string armyStr in ParseHelper.SplitParagraphs(File.ReadAllText(@"C:\Code\AdventOfCode\Input\2018\Day24.txt")))
             {
                 armies[pos] = new List<ArmyGroup>();
 

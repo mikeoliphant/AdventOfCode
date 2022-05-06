@@ -8,9 +8,9 @@
 
         void ReadInput()
         {
-            string[] sections = ParseHelpers.SplitParagraphs(File.ReadAllText(@"C:\Code\AdventOfCode\Input\2020\Day16.txt"));
+            string[] sections = ParseHelper.SplitParagraphs(File.ReadAllText(@"C:\Code\AdventOfCode\Input\2020\Day16.txt"));
 
-            foreach (string ruleStr in ParseHelpers.SplitLines(sections[0]))
+            foreach (string ruleStr in ParseHelper.SplitLines(sections[0]))
             {
                 string[] lr = ruleStr.Split(": ");
 

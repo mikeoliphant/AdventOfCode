@@ -7,7 +7,7 @@
 
         void ReadInput()
         {
-            grid = new Grid<int>().CreateDataFromRows(ParseHelpers.ReadZeroToNineGrid(File.ReadAllText(@"C:\Code\AdventOfCode\Input\2021\Day15.txt")));
+            grid = new Grid<int>().CreateDataFromRows(ParseHelper.ReadZeroToNineGrid(File.ReadAllText(@"C:\Code\AdventOfCode\Input\2021\Day15.txt")));
 
             cost = new Grid<int>(grid.Width, grid.Height);
         }

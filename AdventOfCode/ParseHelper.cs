@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode
 {
-    public static class ParseHelpers
+    public static class ParseHelper
     {
         public static string[] SplitLines(this string input)
         {
