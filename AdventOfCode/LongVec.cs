@@ -67,7 +67,7 @@
 
         public static int TurnFacing(int facing, int rotation)
         {
-            return MathHelper.PosMod(facing + rotation, 4);
+            return ModHelper.PosMod(facing + rotation, 4);
         }
 
         public void AddFacing(int facing, long amount)

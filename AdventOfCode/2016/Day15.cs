@@ -54,7 +54,7 @@
 
             //return time - numDiscs;
 
-            return PrimeAlign.Align(Enumerable.Range(0, numDiscs).Select(d => ((long)discSize[d], (long)discPos[d], (long)MathHelper.PosMod(0 - (d + 1), discSize[d]))));
+            return ModHelper.Align(Enumerable.Range(0, numDiscs).Select(d => ((long)discSize[d], (long)discPos[d], (long)ModHelper.PosMod(0 - (d + 1), discSize[d]))));
         }
     }
 }

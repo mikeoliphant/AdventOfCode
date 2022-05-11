@@ -1,7 +1,21 @@
 ﻿namespace AdventOfCode
 {
-    public static class PrimeAlign
+    public static class ModHelper
     {
+        public static int PosMod(int value, int mod)
+        {
+            int r = value % mod;
+
+            return r < 0 ? r + mod : r;
+        }
+
+        public static long PosMod(long value, long mod)
+        {
+            long r = value % mod;
+
+            return r < 0 ? r + mod : r;
+        }
+
         public static long Align(IEnumerable<(long Modulo, long StartOffset, long DesiredOffset)> toAlign)
         {
             int numIts = 0;
