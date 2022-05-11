@@ -28,6 +28,7 @@
 
         void SetRegister(string register, long val);
         long GetRegister(string register);
+        long GetRegisterOrVal(string registerOrVal);
     }
 
     public class Computer<T> : IComputer where T : ComputerInstruction
@@ -66,6 +67,16 @@
                 return 0;
 
             return Registers[register];
+        }
+
+        public long GetRegisterOrVal(string registerOrVal)
+        {
+            if (char.IsLetter(registerOrVal[0]))
+            {
+                return GetRegister(registerOrVal);
+            }
+
+            return int.Parse(registerOrVal);
         }
 
         public void RunDebug()
