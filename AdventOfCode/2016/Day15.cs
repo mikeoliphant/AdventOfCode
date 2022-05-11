@@ -22,37 +22,39 @@
                 discPos[disc] = int.Parse(match.Groups[2].Value);
             }
 
-            int time = 0;
-            bool aligned = true;
+            //int time = 0;
+            //bool aligned = true;
 
-            do
-            {
-                for (int disc = 0; disc < numDiscs; disc++)
-                {
-                    discPos[disc] = (discPos[disc] + 1) % discSize[disc];
-                }
+            //do
+            //{
+            //    for (int disc = 0; disc < numDiscs; disc++)
+            //    {
+            //        discPos[disc] = (discPos[disc] + 1) % discSize[disc];
+            //    }
 
-                time++;
+            //    time++;
 
-                aligned = true;
+            //    aligned = true;
 
-                int desiredPosition = 0;
+            //    int desiredPosition = 0;
 
-                for (int disc = numDiscs - 1; disc >= 0; disc--)
-                {
-                    if (discPos[disc] != (desiredPosition % discSize[disc]))
-                    {
-                        aligned = false;
+            //    for (int disc = numDiscs - 1; disc >= 0; disc--)
+            //    {
+            //        if (discPos[disc] != (desiredPosition % discSize[disc]))
+            //        {
+            //            aligned = false;
 
-                        break;
-                    }
+            //            break;
+            //        }
 
-                    desiredPosition++;
-                }
-            }
-            while (!aligned);
+            //        desiredPosition++;
+            //    }
+            //}
+            //while (!aligned);
 
-            return time - numDiscs;
+            //return time - numDiscs;
+
+            return PrimeAlign.Align(Enumerable.Range(0, numDiscs).Select(d => ((long)discSize[d], (long)discPos[d], (long)MathHelper.PosMod(0 - (d + 1), discSize[d]))));
         }
     }
 }
