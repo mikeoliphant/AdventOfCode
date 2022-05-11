@@ -57,7 +57,7 @@ namespace AdventOfCode._2018
                     }
                 }
 
-                foreach (var pos in grid.GetRectangle(rect))
+                foreach (var pos in Grid<int>.GetRectangle(rect))
                 {
                     grid[pos.X, pos.Y] = '#';
                 }

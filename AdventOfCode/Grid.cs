@@ -141,7 +141,7 @@
             }
         }
 
-        public IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
+        public static IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
         {
             for (int y = rect.Top; y < rect.Bottom; y++)
             {
@@ -191,12 +191,12 @@
             }
         }
 
-        public IEnumerable<(int X, int Y)> AllNeighbors(int x, int y)
+        public static IEnumerable<(int X, int Y)> AllNeighbors(int x, int y)
         {
             return AllNeighbors(x, y, includeDiagonal: false);
         }
 
-        public IEnumerable<(int X, int Y)> AllNeighbors(int x, int y, bool includeDiagonal)
+        public static IEnumerable<(int X, int Y)> AllNeighbors(int x, int y, bool includeDiagonal)
         {
             yield return (x - 1, y);
             yield return (x + 1, y);

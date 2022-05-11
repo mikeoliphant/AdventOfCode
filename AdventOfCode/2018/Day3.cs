@@ -18,7 +18,7 @@
 
                 claims.Add(claim);
 
-                foreach (var pos in grid.GetRectangle(claim))
+                foreach (var pos in Grid<int>.GetRectangle(claim))
                 {
                     int currentVal = 0;
 

@@ -13,7 +13,7 @@
 
                 if (match.Success)
                 {
-                    foreach (var g in grid.GetRectangle(new Rectangle(0, 0, int.Parse(match.Groups[1].Value), int.Parse(match.Groups[2].Value))))
+                    foreach (var g in Grid<int>.GetRectangle(new Rectangle(0, 0, int.Parse(match.Groups[1].Value), int.Parse(match.Groups[2].Value))))
                     {
                         grid.SetValue(g.X, g.Y, '#');
                     }

@@ -129,7 +129,7 @@
             {
                 foreach (char c in node.Value)
                 {
-                    foreach (var neighbor in grid.AllNeighbors(gridPos.X, gridPos.Y, includeDiagonal: true))
+                    foreach (var neighbor in Grid<int>.AllNeighbors(gridPos.X, gridPos.Y, includeDiagonal: true))
                     {
                         char n;
 
@@ -164,7 +164,7 @@
                             break;
                     }
 
-                    foreach (var neighbor in grid.AllNeighbors(gridPos.X, gridPos.Y, includeDiagonal: true))
+                    foreach (var neighbor in Grid<int>.AllNeighbors(gridPos.X, gridPos.Y, includeDiagonal: true))
                     {
                         char n;
 
@@ -177,7 +177,7 @@
                     }
                 }
 
-                foreach (var neighbor in grid.AllNeighbors(gridPos.X, gridPos.Y, includeDiagonal: true))
+                foreach (var neighbor in Grid<int>.AllNeighbors(gridPos.X, gridPos.Y, includeDiagonal: true))
                 {
                     char n;
 
@@ -268,7 +268,7 @@
 
         IEnumerable<KeyValuePair<(int X, int Y), float>> GetUnblockedNeighborCost((int X, int Y) position)
         {
-            foreach (var pos in grid.AllNeighbors(position.X, position.Y))
+            foreach (var pos in Grid<int>.AllNeighbors(position.X, position.Y))
             {
                 if (grid[pos.X, pos.Y] != '#')
                 {
