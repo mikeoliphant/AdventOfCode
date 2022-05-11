@@ -15,7 +15,7 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            long result = new AdventOfCode._2016.Day14().Compute();
+            long result = new AdventOfCode._2016.Day15().Compute();
         }
     }
 }
