@@ -612,6 +612,15 @@
             return this;
         }
 
+        public override T GetValue(int x, int y)
+        {
+            T value = DefaultValue;
+
+            TryGetValue(x, y, out value);
+
+            return value;
+        }
+
         public override bool TryGetValue(int index1, int index2, out T value)
         {
             ValueTuple<int, int> t = (index1, index2);
