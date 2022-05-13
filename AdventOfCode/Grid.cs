@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode
 {
-    public class GridBase<T> : IEquatable<Grid<T>>
+    public class GridBase<T> : IEquatable<GridBase<T>>
     {
         public T DefaultValue { get; set; }
 
@@ -35,9 +35,31 @@
             }
         }
 
-        public virtual bool Equals(Grid<T> other)
+        public virtual bool Equals(GridBase<T> other)
         {
             return this.GetAllValues().SequenceEqual(other.GetAllValues());
+        }
+
+        public override bool Equals(object other)
+        {
+            if (!(other is GridBase<T>))
+                return false;
+
+            return this.Equals(other as GridBase<T>);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 19;
+
+                foreach (var val in GetAllValues())
+                {
+                    hash = hash * 31 + val.GetHashCode();
+                }
+                return hash;
+            }
         }
 
         public virtual T GetValue(int x, int y)
@@ -55,19 +77,19 @@
             this[x, y] = value;
         }
 
-        public static void Copy(Grid<T> src, Grid<T> dest)
+        public virtual void CopyTo(GridBase<T> dest)
         {
-            Copy(src, dest, 0, 0);
+            foreach (var pos in GetAll())
+            {
+                dest.SetValue(pos.X, pos.Y, this[pos.X, pos.Y]);
+            }
         }
 
-        public static void Copy(Grid<T> src, Grid<T> dest, int destX, int destY)
+        public static void Copy(GridBase<T> src, GridBase<T> dest, int destX, int destY)
         {
-            for (int x = 0; x < src.Width; x++)
+            foreach (var pos in src.GetAll())
             {
-                for (int y = 0; y < src.Height; y++)
-                {
-                    dest.SetValue(destX + x, destY + y, src[x, y]);
-                }
+                dest.SetValue(destX + pos.X, destY + pos.Y, src[pos.X, pos.Y]);
             }
         }
 
@@ -82,9 +104,18 @@
             }
         }
 
+        public virtual GridBase<T> Clone()
+        {
+            var newGrid = CloneEmpty();
+
+            this.CopyTo(newGrid);
+
+            return newGrid;
+        }
+
         public virtual GridBase<T> CloneEmpty()
         {
-            return Activator.CreateInstance(typeof(T)) as GridBase<T>;
+            return Activator.CreateInstance(this.GetType()) as GridBase<T>;
         }
 
         public bool MatchesPattern(Grid<T> patternGrid, int xOffset, int yOffset, T wildcard)
@@ -287,7 +318,7 @@
         {
             data = new T[srcGrid.Width, srcGrid.Height];
 
-            Copy(srcGrid, this);
+            srcGrid.CopyTo(this);
         }
 
         public override T this[int index1, int index2]
@@ -331,10 +362,25 @@
             return true;
         }
 
-        public override GridBase<T> CloneEmpty()
+        public override Grid<T> CloneEmpty()
         {
             return new Grid<T>(Width, Height);
         }
+
+        public Grid<T> Clone()
+        {
+            var newGrid = CloneEmpty();
+
+            this.CopyTo(newGrid);
+
+            return newGrid;
+        }
+
+        public void CopyTo(Grid<T> dest)
+        {
+            dest.data = data.Clone() as T[,];
+        }
+
 
         public override IEnumerable<(int X, int Y)> GetAll()
         {
