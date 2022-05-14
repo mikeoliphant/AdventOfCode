@@ -44,6 +44,12 @@
         {
         }
 
+        public void Reset()
+        {
+            InstructionPointer = 0;
+            Registers.Clear();
+        }
+
         public void SetProgram(IEnumerable<string> instructionStrings)
         {
             foreach (string instructionString in instructionStrings)
