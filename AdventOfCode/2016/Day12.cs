@@ -2,12 +2,12 @@
 {
     internal class Day12
     {
-        class Day23Instruction : ComputerInstruction
+        class Day12Instruction : ComputerInstruction
         {
             string cmd;
             string[] args;
 
-            public Day23Instruction(string instructionString, IComputer computer)
+            public Day12Instruction(string instructionString, IComputer computer)
                 : base(instructionString, computer)
             {
                 string[] split = instructionString.Split(' ');
@@ -52,7 +52,7 @@
 
         public long Compute()
         {
-            Computer<Day23Instruction> computer = new Computer<Day23Instruction>();
+            Computer<Day12Instruction> computer = new Computer<Day12Instruction>();
 
             computer.SetProgram(File.ReadLines(@"C:\Code\AdventOfCode\Input\2016\Day12.txt"));
 
