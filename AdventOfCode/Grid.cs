@@ -1,6 +1,52 @@
 ﻿namespace AdventOfCode
 {
-    public class GridBase<T> : IEquatable<GridBase<T>>
+    public class Grid
+    {
+        public static IEnumerable<(int X, int Y)> GetRectangleInclusive(Rectangle rect)
+        {
+            for (int y = rect.Top; y <= rect.Bottom; y++)
+            {
+                for (int x = rect.X; x <= rect.Right; x++)
+                {
+                    yield return (x, y);
+                }
+            }
+        }
+
+        public static IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
+        {
+            for (int y = rect.Top; y < rect.Bottom; y++)
+            {
+                for (int x = rect.X; x < rect.Right; x++)
+                {
+                    yield return (x, y);
+                }
+            }
+        }
+
+        public static IEnumerable<(int X, int Y)> AllNeighbors(int x, int y)
+        {
+            return AllNeighbors(x, y, includeDiagonal: false);
+        }
+
+        public static IEnumerable<(int X, int Y)> AllNeighbors(int x, int y, bool includeDiagonal)
+        {
+            yield return (x - 1, y);
+            yield return (x + 1, y);
+            yield return (x, y - 1);
+            yield return (x, y + 1);
+
+            if (includeDiagonal)
+            {
+                yield return (x - 1, y - 1);
+                yield return (x - 1, y + 1);
+                yield return (x + 1, y - 1);
+                yield return (x + 1, y + 1);
+            }
+        }
+    }
+
+    public class GridBase<T> : Grid, IEquatable<GridBase<T>>
     {
         public T DefaultValue { get; set; }
 
@@ -65,6 +111,11 @@
         public virtual T GetValue(int x, int y)
         {
             return this[x, y];
+        }
+
+        public virtual T GetValue((int X, int Y) pos)
+        {
+            return GetValue(pos.X, pos.Y);
         }
 
         public virtual bool TryGetValue(int x, int y, out T value)
@@ -172,17 +223,6 @@
             }
         }
 
-        public static IEnumerable<(int X, int Y)> GetRectangle(Rectangle rect)
-        {
-            for (int y = rect.Top; y < rect.Bottom; y++)
-            {
-                for (int x = rect.X; x < rect.Right; x++)
-                {
-                    yield return (x, y);
-                }
-            }
-        }
-
         public IEnumerable<T> GetAllRectangleValues(Rectangle rect)
         {
             for (int y = rect.Top; y < rect.Bottom; y++)
@@ -219,27 +259,6 @@
                         yield return GetValue(x + dx, y + dy);
                     }
                 }
-            }
-        }
-
-        public static IEnumerable<(int X, int Y)> AllNeighbors(int x, int y)
-        {
-            return AllNeighbors(x, y, includeDiagonal: false);
-        }
-
-        public static IEnumerable<(int X, int Y)> AllNeighbors(int x, int y, bool includeDiagonal)
-        {
-            yield return (x - 1, y);
-            yield return (x + 1, y);
-            yield return (x, y - 1);
-            yield return (x, y + 1);
-
-            if (includeDiagonal)
-            { 
-                yield return (x - 1, y - 1);
-                yield return (x - 1, y + 1);
-                yield return (x + 1, y - 1);
-                yield return (x + 1, y + 1);
             }
         }
 
