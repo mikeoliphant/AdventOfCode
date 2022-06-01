@@ -73,5 +73,10 @@
 
             return false;
         }
+
+        public void PrintToConsole()
+        {
+            Grid.PrintToConsole();
+        }
     }
 }
