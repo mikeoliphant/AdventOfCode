@@ -99,6 +99,41 @@
             this.getNeighborCost = getNeighborCost;
         }
 
+        public bool FindFirstPath(T start, T end, out List<T> path, out float cost)
+        {
+            if (start.Equals(end))
+            {
+                path = new List<T> { end };
+                cost = 0;
+
+                return true;
+            }
+
+            foreach (T neighbor in getNeighbors(start))
+            {
+                List<T> neighborPath;
+                float neighborCost;
+
+                if (FindFirstPath(neighbor, end, out neighborPath, out neighborCost))
+                {
+                    neighborCost += (getNeighborCost != null) ? getNeighborCost(start, neighbor) : 1;
+
+                    path = neighborPath;
+                    cost = neighborCost;
+
+                    path.Insert(0, start);
+
+                    return true;
+                }
+            }
+
+            path = null;
+            cost = 0;
+
+            return false;
+        }
+
+
         public bool GetShortestPath(T start, T end, out List<T> path, out float cost)
         {
             if (start.Equals(end))
@@ -118,8 +153,8 @@
                 float neighborCost;
 
                 if (GetShortestPath(neighbor, end, out neighborPath, out neighborCost))
-                {
-                    neighborCost += getNeighborCost(start, neighbor);
+                {                    
+                    neighborCost += (getNeighborCost != null) ? getNeighborCost(start, neighbor) : 1;
 
                     if (neighborCost < minCost)
                     {
@@ -130,6 +165,11 @@
             }
 
             path = minCostPath;
+            cost = minCost;
+
+            if (path == null)
+                return false;
+
             path.Insert(0, start);
 
             cost = minCost;
