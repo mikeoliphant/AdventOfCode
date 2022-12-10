@@ -47,5 +47,15 @@
             for (int i = 0; i < Children.Count; i++)
                 Children[i].PrintNode(indent, i == Children.Count - 1);
         }
+
+        public void RunNodeAction(Action<TreeNode<T>> action)
+        {
+            action(this);
+
+            foreach (var child in Children)
+            {
+                child.RunNodeAction(action);
+            }
+        }
     }
 }

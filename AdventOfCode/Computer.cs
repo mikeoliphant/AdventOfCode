@@ -4,6 +4,7 @@
     {
         public IComputer Computer { get; private set; }
         public string InstructionString { get; private set; }
+        public int NumCycles { get; protected set; } = 1;
 
         public ComputerInstruction(string instructionString, IComputer computer)
         {
@@ -39,6 +40,9 @@
         public string LastWrittenRegister { get; private set; }
         public T LastInstruction { get; private set; }
         public int LastInstructionPos { get; private set; }
+        public long CurrentCycle { get; private set; } = 1;
+
+        int instructionCycle = 0;
 
         public Computer()
         {
@@ -198,6 +202,27 @@
             while (true);
         }
 
+        public bool AdvanceCycle()
+        {
+            if (InstructionPointer >= Instructions.Count)
+                return false;
+
+            instructionCycle++;
+            CurrentCycle++;
+
+            if (instructionCycle >= Instructions[InstructionPointer].NumCycles)
+            {
+                LastInstruction = Instructions[InstructionPointer];
+                LastInstructionPos = InstructionPointer;
+
+                Instructions[InstructionPointer].Execute();
+
+                instructionCycle = 0;
+            }
+
+            return true;
+        }
+
         public bool RunInstruction()
         {
             if (InstructionPointer >= Instructions.Count)
@@ -206,7 +231,9 @@
             LastInstruction = Instructions[InstructionPointer];
             LastInstructionPos = InstructionPointer;
 
-            Instructions[InstructionPointer].Execute();
+            LastInstruction.Execute();
+
+            CurrentCycle += LastInstruction.NumCycles;
 
             return true;
         }
