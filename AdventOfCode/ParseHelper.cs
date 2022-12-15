@@ -62,6 +62,41 @@
             return input.Split(delimeter).ToFloats();
         }
 
+        public static IEnumerable<string> SplitTopLevel(string input, char splitChar, char openParen, char closeParen)
+        {
+            int nestLevel = 0;
+            int lastPos = 0;
+
+            for (int pos = 0; pos < input.Length; pos++)
+            {
+                if (input[pos] == openParen)
+                {
+                    nestLevel++;
+                }
+                else if (input[pos] == closeParen)
+                {
+                    nestLevel--;
+                }
+                else
+                {
+                    if (nestLevel == 0)
+                    {
+                        if (input[pos] == splitChar)
+                        {
+                            yield return input.Substring(lastPos, pos - lastPos);
+
+                            lastPos = pos + 1;
+                        }
+                    }
+                }                
+            }
+
+            if (lastPos < input.Length)
+            {
+                yield return input.Substring(lastPos, input.Length - lastPos);
+            }
+        }
+
         public static IEnumerable<IEnumerable<int>> ReadZeroToNineGrid(string input)
         {
             return from line in input.TrimEnd().SplitLines() select (from c in line.ToCharArray() select (int)(c - '0'));

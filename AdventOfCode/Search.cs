@@ -14,15 +14,40 @@
     public class DijkstraSearch<T> where T : IEquatable<T>
     {
         Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors;
+        Func<T, IEnumerable<T>> getNeighborsNoCost;
 
         public DijkstraSearch(Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors)
         {
             this.getNeighbors = getNeighbors;
         }
 
+        public DijkstraSearch(Func<T, IEnumerable<T>> getNeighborsNoCost)
+        {
+            this.getNeighbors = GetFixedCostNeighbors;
+            this.getNeighborsNoCost = getNeighborsNoCost;
+        }
+
+        IEnumerable<KeyValuePair<T, float>> GetFixedCostNeighbors(T currentState)
+        {
+            foreach (T state in getNeighborsNoCost(currentState))
+            {
+                yield return new KeyValuePair<T, float>(state, 1.0f);
+            }
+        }
+
         public bool GetShortestPath(T start, T end, out List<T> path, out float cost)
         {
             return GetShortestPath(start, delegate (T t) { return t.Equals(end); }, out path, out cost);
+        }
+
+        public (List<T> Path, float Cost) GetShortestPath(T start, T end)
+        {
+            List<T> path = null;
+            float cost = float.MaxValue;
+
+            GetShortestPath(start, delegate (T t) { return t.Equals(end); }, out path, out cost);
+
+            return (path, cost);
         }
 
         public bool GetShortestPath(T start, Func<T, bool> endCheck, out List<T> path, out float cost)

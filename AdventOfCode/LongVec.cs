@@ -22,6 +22,9 @@
             get { return new LongVec2(0, 0); }
         }
 
+        public static LongVec2 MaxValue { get { return new LongVec2(long.MaxValue, long.MaxValue); } }
+        public static LongVec2 MinValue { get { return new LongVec2(long.MinValue, long.MinValue); } }
+
         public override string ToString()
         {
             return X + ", " + Y;
