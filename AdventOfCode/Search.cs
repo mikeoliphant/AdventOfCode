@@ -1,33 +1,22 @@
 ﻿namespace AdventOfCode
 {
-    public class GraphEdge<T>
+    public class SearchBase<T> where T : IEquatable<T>
     {
-        public T From { get; set; }
-        public T To { get; set; }
+        protected Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors;
+        protected Func<T, IEnumerable<T>> getNeighborsNoCost;
 
-        public override string ToString()
-        {
-            return "(" + From + ")->(" + To + ")";
-        }
-    }
-
-    public class DijkstraSearch<T> where T : IEquatable<T>
-    {
-        Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors;
-        Func<T, IEnumerable<T>> getNeighborsNoCost;
-
-        public DijkstraSearch(Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors)
+        public SearchBase(Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors)
         {
             this.getNeighbors = getNeighbors;
         }
 
-        public DijkstraSearch(Func<T, IEnumerable<T>> getNeighborsNoCost)
+        public SearchBase(Func<T, IEnumerable<T>> getNeighborsNoCost)
         {
             this.getNeighbors = GetFixedCostNeighbors;
             this.getNeighborsNoCost = getNeighborsNoCost;
         }
 
-        IEnumerable<KeyValuePair<T, float>> GetFixedCostNeighbors(T currentState)
+        protected IEnumerable<KeyValuePair<T, float>> GetFixedCostNeighbors(T currentState)
         {
             foreach (T state in getNeighborsNoCost(currentState))
             {
@@ -50,7 +39,54 @@
             return (path, cost);
         }
 
-        public bool GetShortestPath(T start, Func<T, bool> endCheck, out List<T> path, out float cost)
+        public (List<T> Path, float Cost) GetShortestPath(T start, Func<T, bool> endCheck)
+        {
+            List<T> path = null;
+            float cost = float.MaxValue;
+
+            GetShortestPath(start, endCheck, out path, out cost);
+
+            return (path, cost);
+        }
+
+        public virtual bool GetShortestPath(T start, Func<T, bool> endCheck, out List<T> path, out float cost)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class GraphEdge<T>
+    {
+        public T From { get; set; }
+        public T To { get; set; }
+
+        public override string ToString()
+        {
+            return "(" + From + ")->(" + To + ")";
+        }
+    }
+
+    public class DijkstraSearch<T> : SearchBase<T> where T : IEquatable<T>
+    {
+        Dictionary<T, T> pred = new Dictionary<T, T>();
+        PriorityQueue<GraphEdge<T>, float> searchQueue = new PriorityQueue<GraphEdge<T>, float>();
+
+        public DijkstraSearch(Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors)
+            : base(getNeighbors)
+        {
+        }
+
+        public DijkstraSearch(Func<T, IEnumerable<T>> getNeighborsNoCost)
+            : base(getNeighborsNoCost)
+        {
+        }
+
+        public void SetSearchQueue(PriorityQueue<GraphEdge<T>, float> searchQueue)
+        {
+            this.searchQueue = searchQueue;
+        }
+
+        public override bool GetShortestPath(T start, Func<T, bool> endCheck, out List<T> path, out float cost)
         {
             if (endCheck(start))
             {
@@ -60,8 +96,8 @@
                 return true;
             }
 
-            PriorityQueue<GraphEdge<T>, float> searchQueue = new PriorityQueue<GraphEdge<T>, float>();
-            Dictionary<T, T> pred = new Dictionary<T, T>(); 
+            pred.Clear();
+            searchQueue.Clear();
 
             path = null;
             cost = float.MaxValue;
@@ -113,15 +149,16 @@
         }
     }
 
-    public class DepthFirstSearch<T> where T : IEquatable<T>
+    public class DepthFirstSearch<T> : SearchBase<T> where T : IEquatable<T>
     {
-        Func<T, IEnumerable<T>> getNeighbors;
-        Func<T, T, float> getNeighborCost;
-
-        public DepthFirstSearch(Func<T, IEnumerable<T>> getNeighbors, Func<T, T, float> getNeighborCost)
+        public DepthFirstSearch(Func<T, IEnumerable<KeyValuePair<T, float>>> getNeighbors)
+            : base(getNeighbors)
         {
-            this.getNeighbors = getNeighbors;
-            this.getNeighborCost = getNeighborCost;
+        }
+
+        public DepthFirstSearch(Func<T, IEnumerable<T>> getNeighborsNoCost)
+            : base(getNeighborsNoCost)
+        {
         }
 
         public bool FindFirstPath(T start, T end, out List<T> path, out float cost)
@@ -134,14 +171,15 @@
                 return true;
             }
 
-            foreach (T neighbor in getNeighbors(start))
+            foreach (var neighbor in getNeighbors(start))
             {
                 List<T> neighborPath;
+
                 float neighborCost;
 
-                if (FindFirstPath(neighbor, end, out neighborPath, out neighborCost))
+                if (FindFirstPath(neighbor.Key, end, out neighborPath, out neighborCost))
                 {
-                    neighborCost += (getNeighborCost != null) ? getNeighborCost(start, neighbor) : 1;
+                    neighborCost += neighbor.Value;
 
                     path = neighborPath;
                     cost = neighborCost;
@@ -158,12 +196,11 @@
             return false;
         }
 
-
-        public bool GetShortestPath(T start, T end, out List<T> path, out float cost)
+        public override bool GetShortestPath(T start, Func<T, bool> endCheck, out List<T> path, out float cost)
         {
-            if (start.Equals(end))
+            if (endCheck(start))
             {
-                path = new List<T> { end };
+                path = new List<T>();
                 cost = 0;
 
                 return true;
@@ -172,14 +209,14 @@
             List<T> minCostPath = null;
             float minCost = float.MaxValue;
 
-            foreach (T neighbor in getNeighbors(start))
+            foreach (var neighbor in getNeighbors(start))
             {
                 List<T> neighborPath;
                 float neighborCost;
 
-                if (GetShortestPath(neighbor, end, out neighborPath, out neighborCost))
-                {                    
-                    neighborCost += (getNeighborCost != null) ? getNeighborCost(start, neighbor) : 1;
+                if (GetShortestPath(neighbor.Key, endCheck, out neighborPath, out neighborCost))
+                {
+                    neighborCost += neighbor.Value;
 
                     if (neighborCost < minCost)
                     {

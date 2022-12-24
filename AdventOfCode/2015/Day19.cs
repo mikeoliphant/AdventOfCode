@@ -74,22 +74,6 @@
             }
         }
 
-        IEnumerable<string> GetNeighbors2(string state)
-        {
-            for (int pos = state.Length - 1; pos >= 0; pos--)
-            {
-                foreach (var rule in rules)
-                {
-                    if (Match(state, rule.From, pos))
-                    {
-                        string replace = Replace(state, rule.From, rule.To, pos);
-
-                        yield return replace;
-                    }
-                }
-            }
-        }
-
         public override long Compute2()
         {
             ReadInput();
@@ -106,7 +90,7 @@
             string startMolecule = "e";
 
             //DijkstraSearch<string> search = new DijkstraSearch<string>(GetNeighbors);
-            DepthFirstSearch<string> search = new DepthFirstSearch<string>(GetNeighbors2, null);
+            DepthFirstSearch<string> search = new DepthFirstSearch<string>(GetNeighbors);
 
             List<string> path;
             float cost;
