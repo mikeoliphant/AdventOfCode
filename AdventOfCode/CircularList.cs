@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode
+﻿using System.Security.Permissions;
+
+namespace AdventOfCode
 {
     public static class LinkedListExtensions
     {
@@ -163,6 +165,13 @@
             return value;
         }
 
+        public void Add(T value)
+        {
+            list.AddLast(value);
+
+            First = list.First;
+        }
+
         public void InsertAt(int position, T value)
         {
             if (position == Count)
@@ -215,6 +224,23 @@
         public void InsertAfter(LinkedListNode<T> afterNode, LinkedListNode<T> node)
         {
             list.AddAfter(afterNode, node);
+        }
+
+        public void MoveNodeCircular(LinkedListNode<T> node, long move)
+        {
+            move %= (Count - 1);
+
+            if (move == 0)
+                return;
+
+            LinkedListNode<T> toNode = node.MoveCircular((int)move);
+
+            Remove(node);
+
+            if (move > 0)
+                InsertAfter(toNode, node);
+            else
+                InsertBefore(toNode, node);
         }
 
         public void Rotate(int offset)

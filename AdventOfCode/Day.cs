@@ -22,14 +22,19 @@
             }
         }
 
+        public string DataFileDir
+        {
+            get { return @"C:\Code\AdventOfCode\Input\" + Year; }
+        }
+
         public string DataFile
         {
-            get { return @"C:\Code\AdventOfCode\Input\" + Year + @"\Day" + DayNumber + ".txt"; }
+            get { return Path.Combine(DataFileDir, "Day" + DayNumber + ".txt"); }
         }
 
         public string DataFileTest
         {
-            get { return @"C:\Code\AdventOfCode\Input\" + Year + @"\Day" + DayNumber + "Test.txt"; }
+            get { return Path.Combine(DataFileDir, "Day" + DayNumber + "Test.txt"); }
         }
 
         public virtual long Compute()

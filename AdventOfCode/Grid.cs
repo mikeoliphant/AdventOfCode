@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode
+﻿using System.Diagnostics;
+
+namespace AdventOfCode
 {
     public class Grid
     {
@@ -132,7 +134,10 @@
         {
             foreach (var pos in GetAll())
             {
-                dest.SetValue(pos.X, pos.Y, this[pos.X, pos.Y]);
+                T srcVal = this[pos.X, pos.Y];
+
+                if (!srcVal.Equals(DefaultValue))
+                    dest.SetValue(pos.X, pos.Y, srcVal);
             }
         }
 
@@ -140,7 +145,10 @@
         {
             foreach (var pos in src.GetAll())
             {
-                dest.SetValue(destX + pos.X, destY + pos.Y, src[pos.X, pos.Y]);
+                T srcVal = src[pos.X, pos.Y];
+
+                if (!srcVal.Equals(src.DefaultValue))
+                    dest.SetValue(destX + pos.X, destY + pos.Y, srcVal);
             }
         }
 
@@ -150,7 +158,10 @@
             {
                 for (int y = 0; y < srcHeight; y++)
                 {
-                    dest.SetValue(destX + x, destY + y, src[x + srcX, y + srcY]);
+                    T srcVal = src[x + srcX, y + srcY];
+
+                    if (!srcVal.Equals(src.DefaultValue))
+                        dest.SetValue(destX + x, destY + y, srcVal);
                 }
             }
         }
@@ -634,6 +645,12 @@
         {
         }
 
+        public SparseGrid(SparseGrid<T> srcGrid)
+        {
+            this.data = new Dictionary<(int, int), T>(srcGrid.data);
+            this.DefaultValue = srcGrid.DefaultValue;
+        }
+
         public override T this[int index1, int index2]
         {
             get
@@ -723,6 +740,18 @@
                     yield return pos;
                 }
             }
+        }
+
+        public (int MinX, int MinY, int MaxX, int MaxY) GetBounds()
+        {
+            int minX;
+            int minY;
+            int maxX;
+            int maxY;
+
+            GetBounds(out minX, out minY, out maxX, out maxY);
+
+            return (minX, minY, maxX, maxY);
         }
 
         public void GetBounds(out int minX, out int minY, out int maxX, out int maxY)

@@ -25,6 +25,11 @@
         public static LongVec2 MaxValue { get { return new LongVec2(long.MaxValue, long.MaxValue); } }
         public static LongVec2 MinValue { get { return new LongVec2(long.MinValue, long.MinValue); } }
 
+        public void Deconstruct(out long X, out long Y)
+        {
+            X = this.X;
+            Y = this.Y;
+        }
         public override string ToString()
         {
             return X + ", " + Y;
@@ -102,6 +107,13 @@
         public long Y { get; set; }
         public long Z { get; set; }
 
+        public LongVec3(long xyz)
+        {
+            this.X = xyz;
+            this.Y = xyz;
+            this.Z = xyz;
+        }
+
         public LongVec3(long x, long y, long z)
         {
             this.X = x;
@@ -118,8 +130,16 @@
 
         public static LongVec3 Zero
         {
-            get { return new LongVec3(0, 0, 0); }
+            get { return new LongVec3(0); }
         }
+
+        public static LongVec3 One
+        {
+            get { return new LongVec3(1); }
+        }
+
+        public static LongVec3 MaxValue { get { return new LongVec3(long.MaxValue); } }
+        public static LongVec3 MinValue { get { return new LongVec3(long.MinValue); } }
 
         public override string ToString()
         {
@@ -134,6 +154,16 @@
         public long ManhattanDistance(LongVec3 other)
         {
             return Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
+        }
+
+        public IEnumerable<LongVec3> GetNeighbors()
+        {
+            yield return (this + new LongVec3(1, 0, 0));
+            yield return (this + new LongVec3(-1, 0, 0));
+            yield return (this + new LongVec3(0, 1, 0));
+            yield return (this + new LongVec3(0, -1, 0));
+            yield return (this + new LongVec3(0, 0, 1));
+            yield return (this + new LongVec3(0, 0, -1));
         }
 
         public override bool Equals(object obj)
