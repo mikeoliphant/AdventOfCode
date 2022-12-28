@@ -11,6 +11,12 @@
             this.Y = y;
         }
 
+        public LongVec2((long X, long Y) pos)
+        {
+            this.X = pos.X;
+            this.Y = pos.Y;
+        }
+
         public LongVec2(long[] components)
         {
             this.X = components[0];

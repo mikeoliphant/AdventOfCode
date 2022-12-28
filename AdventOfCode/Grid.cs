@@ -26,6 +26,11 @@ namespace AdventOfCode
             }
         }
 
+        public static IEnumerable<(int X, int Y)> AllNeighbors((int X, int Y) pos)
+        {
+            return AllNeighbors(pos.X, pos.Y, includeDiagonal: false);
+        }
+
         public static IEnumerable<(int X, int Y)> AllNeighbors(int x, int y)
         {
             return AllNeighbors(x, y, includeDiagonal: false);
@@ -128,6 +133,16 @@ namespace AdventOfCode
         public virtual void SetValue(int x, int y, T value)
         {
             this[x, y] = value;
+        }
+
+        public virtual void SetValue((int X, int Y) pos, T value)
+        {
+            this[pos.X, pos.Y] = value;
+        }
+
+        public virtual void Clear()
+        {
+            throw new NotImplementedException();
         }
 
         public virtual void CopyTo(GridBase<T> dest)
@@ -390,6 +405,11 @@ namespace AdventOfCode
             value = data[x, y];
 
             return true;
+        }
+
+        public override void Clear()
+        {
+            Fill(DefaultValue);
         }
 
         public override Grid<T> CloneEmpty()
@@ -685,7 +705,7 @@ namespace AdventOfCode
 
             for (int y = 0; y < array.Length; y++)
             {
-                for (int x = 0; x < array[0].Length; x++)
+                for (int x = 0; x < array[y].Length; x++)
                 {
                     data[(x, y)] = array[y][x];
                 }
@@ -703,6 +723,11 @@ namespace AdventOfCode
             return value;
         }
 
+        public bool IsValid((int X, int Y) pos)
+        {
+            return data.ContainsKey(pos);
+        }
+
         public override bool TryGetValue(int index1, int index2, out T value)
         {
             ValueTuple<int, int> t = (index1, index2);
@@ -717,6 +742,16 @@ namespace AdventOfCode
             value = DefaultValue;
 
             return false;
+        }
+
+        public void RemoveValue((int X, int Y) pos)
+        {
+            data.Remove(pos);
+        }
+
+        public override void Clear()
+        {
+            data.Clear();
         }
 
         public override IEnumerable<(int X, int Y)> GetAll()
