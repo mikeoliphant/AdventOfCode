@@ -1,7 +1,19 @@
-﻿using static System.Windows.Forms.VisualStyles.VisualStyleElement.ScrollBar;
+﻿using OpenTK.Graphics.ES10;
+using OpenTK.Graphics.OpenGL;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ScrollBar;
 
 namespace AdventOfCode._2022
 {
+    static class Vector3Helper
+    {
+        public static Vector3 Round(this Vector3 vec)
+        {
+            return new Vector3((float)Math.Round(vec.X), (float)Math.Round(vec.Y), (float)Math.Round(vec.Z));
+        }
+    }
+
     internal class Day22 : Day
     {
         SparseGrid<char> grid;
@@ -120,6 +132,22 @@ namespace AdventOfCode._2022
                             }
 
                             num--;
+
+                            switch (facing)
+                            {
+                                case 0:
+                                    grid[(int)pos.X, (int)pos.Y] = '^';
+                                    break;
+                                case 1:
+                                    grid[(int)pos.X, (int)pos.Y] = '>';
+                                    break;
+                                case 2:
+                                    grid[(int)pos.X, (int)pos.Y] = 'v';
+                                    break;
+                                case 3:
+                                    grid[(int)pos.X, (int)pos.Y] = '<';
+                                    break;
+                            }
                         }
 
                         break;
@@ -167,36 +195,154 @@ namespace AdventOfCode._2022
             });
         }
 
-        void RenderFace(char number, int col, int row, int size)
+        public struct Axis
         {
-            foreach (var pos in Grid.GetRectangle(new Rectangle(col * size, row * size, size, size)))
+            const float PiOver2 = (float)Math.PI / 2.0f;
+
+            Vector3 forward = new Vector3(0, 1, 0);
+            Vector3 right = new Vector3(1, 0, 0);
+            Vector3 up = new Vector3(0, 0, 1);
+
+            public Quaternion Rotation { get; set; } = Quaternion.Identity;
+
+            public Vector3 Forward { get { return Vector3.Transform(forward, Rotation).Round(); } }
+            public Vector3 Right { get { return Vector3.Transform(right, Rotation).Round(); } }
+            public Vector3 Up { get { return Vector3.Transform(up, Rotation).Round(); } }
+
+            public Axis()
             {
-                faceGrid[pos] = number;
+            }
+
+            public Axis(Quaternion rotation)
+            {
+                this.Rotation = rotation;
+            }
+
+            public Axis(Axis other)
+            {
+                this.Rotation = other.Rotation;
+            }
+
+            public Axis RotateLeft()
+            {
+                return new Axis(Rotation * Quaternion.CreateFromAxisAngle(forward, -PiOver2));
+            }
+
+            public Axis RotateRight()
+            {
+                return new Axis(Rotation * Quaternion.CreateFromAxisAngle(forward, PiOver2));
+            }
+
+            public Axis RotateForwad()
+            {
+                return new Axis(Rotation * Quaternion.CreateFromAxisAngle(right, -PiOver2));
+            }
+
+            public Axis RotateBack()
+            {
+                return new Axis(Rotation * Quaternion.CreateFromAxisAngle(right, PiOver2));
+            }
+
+            public Axis Invert()
+            {
+                return new Axis(Quaternion.Inverse(Rotation));
+            }
+
+            public Vector3 Transform(Vector3 point)
+            {
+                return Vector3.Transform(point, Rotation).Round();
+            }
+
+            public override string ToString()
+            {
+                return Forward.ToString() + " " + Right.ToString() + " " + Up.ToString();
             }
         }
 
-        SparseGrid<char> faceGrid = new SparseGrid<char>();
+        Dictionary<Vector3, (int Col, int Row)> faces = new Dictionary<Vector3, (int Col, int Row)>();
+        Dictionary<(int Col, int Row), Axis> axes = new Dictionary<(int Col, int Row), Axis>();
+
+        const int faceSize = 4;
+
+        bool ReadFaces(Axis axis, (int Col, int Row) startPos)
+        {
+            char val;
+
+            grid.TryGetValue(startPos.Col * faceSize, startPos.Row * faceSize, out val);
+
+            if (val == ' ')
+                return false;
+
+            if (faces.ContainsValue(startPos))
+                return false;
+
+            faces[axis.Up] = startPos;
+            axes[startPos] = axis;
+
+            ReadFaces(axis.RotateLeft(), (startPos.Col - 1, startPos.Row));
+            ReadFaces(axis.RotateRight(), (startPos.Col + 1, startPos.Row));
+            ReadFaces(axis.RotateForwad(), (startPos.Col, startPos.Row - 1));
+            ReadFaces(axis.RotateBack(), (startPos.Col, startPos.Row + 1));
+
+            return true;
+        }
+
+        public static (int X, int Y) OffsetFromFacing(int facing)
+        {
+            switch (facing)
+            {
+                case 0:
+                    return (0, 1);
+                case 1:
+                    return (1, 0);
+                case 2:
+                    return (0, -1);
+                case 3:
+                    return (-1, 0);
+            }
+
+            throw new Exception();
+        }
+
+        public static int FacingFromOffset((int X, int Y) offset)
+        {
+            if (offset.X < 0)
+                return 3;
+
+            if (offset.X > 0)
+                return 1;
+
+            if (offset.Y < 0)
+                return 2;
+
+            if (offset.Y > 0)
+                return 0;
+
+            throw new Exception();
+        }
 
         public override long Compute2()
         {
             ReadInput(DataFileTest);
 
-            grid.GetBounds();
+            Axis axis = new Axis();
 
-            bounds = grid.GetBounds();
+            var bounds = grid.GetBounds();
 
-            //grid.PrintToConsole();
+            int width = (bounds.MaxX + 1);
+            int height = (bounds.MaxY + 1);
 
-            faceGrid.DefaultValue = ' ';
+            int maxRow = width / faceSize;
+            int maxCol = height / faceSize;
 
-            RenderFace('1', 2, 0, 4);
-            RenderFace('2', 0, 1, 4);
-            RenderFace('3', 1, 1, 4);
-            RenderFace('4', 2, 1, 4);
-            RenderFace('5', 2, 2, 4);
-            RenderFace('6', 3, 2, 4);
-
-            //faceGrid.PrintToConsole();
+            for (int row = 0; row < maxRow; row++)
+            {
+                for (int col = 0; col < maxCol; col++)
+                {
+                    if (ReadFaces(axis, (col, row)))
+                        break;
+                }
+            }
 
             LongVec2 pos = new LongVec2(grid.GetAll().OrderBy(p => p.Y).ThenBy(p => p.X).First());
 
@@ -204,29 +350,53 @@ namespace AdventOfCode._2022
 
             return WalkPath(pos, facing, delegate ((LongVec2 Pos, int Facing) state)
             {
-                switch (faceGrid[(int)state.Pos.X, (int)state.Pos.Y])
-                {
-                    case '1':
-                        switch (facing)
-                        {
-                            case 0:
+                var colRow = state.Pos / faceSize;
 
-                                break;
-                        }
+                Axis axis = axes[((int)colRow.X, (int)colRow.Y)];
+
+                state.Pos.AddFacing(state.Facing, 1);
+                state.Pos.X = ModHelper.PosMod(state.Pos.X, width);
+                state.Pos.Y = ModHelper.PosMod(state.Pos.Y, height);
+
+                switch (state.Facing)
+                {
+                    case 0:
+                        axis = axis.RotateForwad();
                         break;
-                    case '2':
+                    case 1:
+                        axis = axis.RotateRight();
                         break;
-                    case '3':
+                    case 2:
+                        axis = axis.RotateBack();
                         break;
-                    case '4':
-                        break;
-                    case '5':
-                        break;
-                    case '6':
+                    case 3:
+                        axis = axis.RotateLeft();
                         break;
                 }
 
-                return state;
+                var colRow2 = faces[axis.Up];
+
+                Axis axis2 = axes[colRow2];
+                (long X, long Y) gridPos = (state.Pos.X % faceSize, state.Pos.Y % faceSize);
+                gridPos.Y = faceSize - gridPos.Y - 1;
+
+                Vector3 cubePos = axis.Transform(new Vector3(gridPos.X, gridPos.Y, 0));
+
+                Vector3 inverted = axis2.Invert().Transform(cubePos);
+
+                LongVec2 newPos = new LongVec2((int)inverted.X, (int)inverted.Y);
+
+                var offset = OffsetFromFacing(state.Facing);
+
+                Vector3 cubeOffset = axis.Transform(new Vector3(offset.X, offset.Y, 0));
+
+                var invertedOffset = axis2.Invert().Transform(cubeOffset);
+
+                int newFacing = FacingFromOffset(((int)invertedOffset.X, (int)invertedOffset.Y));
+
+                grid.PrintToConsole();
+
+                return ((new LongVec2(colRow2) * faceSize) + newPos, newFacing);
             });
         }
     }

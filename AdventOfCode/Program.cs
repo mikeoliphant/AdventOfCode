@@ -5,7 +5,6 @@ global using System.Drawing;
 global using System.IO;
 global using System.Linq;
 global using System.Numerics;
-global using System.Text;
 global using System.Text.RegularExpressions;
 global using System.Threading;
 
@@ -15,7 +14,7 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            long result = new AdventOfCode._2022.Day25().Compute();
+            long result = new AdventOfCode._2023.Day1().Compute2();
         }
     }
 }

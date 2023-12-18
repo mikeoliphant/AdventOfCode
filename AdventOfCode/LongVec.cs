@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode
+﻿using System.Security.Policy;
+
+namespace AdventOfCode
 {
     struct LongVec2 : IEquatable<LongVec2>
     {
@@ -76,8 +78,12 @@
         public static LongVec2 operator -(LongVec2 a, LongVec2 b) => new LongVec2(a.X - b.X, a.Y - b.Y);
 
         public static LongVec2 operator *(LongVec2 a, LongVec2 b) => new LongVec2(a.X * b.X, a.Y * b.Y);
+        public static LongVec2 operator *(LongVec2 a, long b) => new LongVec2(a.X * b, a.Y * b);
+        public static LongVec2 operator *(long a, LongVec2 b) => new LongVec2(a * b.X, a * b.Y);
 
         public static LongVec2 operator /(LongVec2 a, LongVec2 b) => new LongVec2(a.X / b.X, a.Y / b.Y);
+        public static LongVec2 operator /(LongVec2 a, long b) => new LongVec2(a.X / b, a.Y / b);
+        public static LongVec2 operator /(long a, LongVec2 b) => new LongVec2(a / b.X, a / b.Y);
 
         public static int TurnFacing(int facing, int rotation)
         {
