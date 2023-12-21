@@ -379,6 +379,22 @@ namespace AdventOfCode
             }
         }
 
+        public bool IsValid(int x, int y)
+        {
+            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
+                return false;
+
+            return true;
+        }
+
+        public bool IsValid((int X, int Y) cell)
+        {
+            if ((cell.X < 0) || (cell.X >= Width) || (cell.Y < 0) || (cell.Y >= Height))
+                return false;
+
+            return true;
+        }
+
         public override T GetValue(int x, int y)
         {
             if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
