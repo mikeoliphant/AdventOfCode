@@ -70,7 +70,7 @@ namespace AdventOfCode
 
         public static bool operator !=(LongVec2 v1, LongVec2 v2)
         {
-            return v1 != v2;
+            return !v1.Equals(v2);
         }
 
         public static LongVec2 operator +(LongVec2 a, LongVec2 b) => new LongVec2(a.X + b.X, a.Y + b.Y);
