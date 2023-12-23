@@ -8,7 +8,7 @@
         {
             grid = new Automata<char>(new Grid<char>().CreateDataFromRows(File.ReadLines(DataFile)));
 
-            grid.CellUpdateFuntion = delegate ((int X, int Y) pos, char c)
+            grid.CellUpdateFunction = delegate ((int X, int Y) pos, char c)
             {
                 int onNeighbors = grid.Grid.ValidNeighborValues(pos.X, pos.Y, includeDiagonal: true).Where(g => g == '#').Count();
 
@@ -39,7 +39,7 @@
 
             //grid.PrintToConsole();
 
-            grid.CellUpdateFuntion = delegate ((int X, int Y) pos, char c)
+            grid.CellUpdateFunction = delegate ((int X, int Y) pos, char c)
             {                
                 int onNeighbors = grid.Grid.ValidNeighborValues(pos.X, pos.Y, includeDiagonal: true).Where(g => g != '.').Count();
 

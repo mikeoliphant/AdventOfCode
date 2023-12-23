@@ -7,7 +7,7 @@
         void ReadInput()
         {
             automata = new Automata<char>(new Grid<char>().CreateDataFromRows(File.ReadLines(@"C:\Code\AdventOfCode\Input\2018\Day18.txt")));
-            automata.CellUpdateFuntion = UpdateCell;
+            automata.CellUpdateFunction = UpdateCell;
         }
 
         char UpdateCell((int X, int Y) pos, char c)

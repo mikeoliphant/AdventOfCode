@@ -97,16 +97,16 @@
                 char[] condition = split[0].ToCharArray();
                 int[] groups = split[1].ToInts(',').ToArray();
 
-                var expandedCondtion = condition;
+                var expandedCondition = condition;
                 var expandedGroups = groups;
 
                 for (int i = 0; i < 4; i++)
                 {
-                    expandedCondtion = expandedCondtion.Append('?').Concat(condition).ToArray();
+                    expandedCondition = expandedCondition.Append('?').Concat(condition).ToArray();
                     expandedGroups = expandedGroups.Concat(groups).ToArray();
                 }
 
-                numMatch += GetNumMatches(expandedCondtion, expandedGroups);
+                numMatch += GetNumMatches(expandedCondition, expandedGroups);
             }
 
             return numMatch;

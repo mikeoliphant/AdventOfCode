@@ -2,9 +2,9 @@
 {
     public class Automata<T>
     {
-        public GridBase<T> Grid { get; private set; }
-        public GridBase<T> StartGrid { get; private set; }
-        public Func<(int X, int Y), T, T> CellUpdateFuntion { get; set; }
+        public GridBase<T> Grid { get; protected set; }
+        public GridBase<T> StartGrid { get; protected set; }
+        public Func<(int X, int Y), T, T> CellUpdateFunction { get; set; }
 
         public Automata(GridBase<T> grid)
         {
@@ -23,13 +23,13 @@
                 Cycle();
         }
 
-        public void Cycle()
+        public virtual void Cycle()
         {
             GridBase<T> newGrid = Grid.CloneEmpty();
 
             foreach (var pos in Grid.GetAll())
             {
-                newGrid[pos] = CellUpdateFuntion(pos, Grid[pos]);
+                newGrid[pos] = CellUpdateFunction(pos, Grid[pos]);
             }
 
             Grid = newGrid;
@@ -49,7 +49,7 @@
                 {
                     histInARow++;
 
-                    if (histInARow == 100)
+                    if (histInARow == numHitsInARow)
                     {
                         loopSize = cycle - history[hash];
 
