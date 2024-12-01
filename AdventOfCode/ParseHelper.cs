@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode
+﻿using System.Security.Cryptography;
+
+namespace AdventOfCode
 {
     public static class ParseHelper
     {
@@ -60,6 +62,16 @@
         public static IEnumerable<float> ToFloats(this string input, string delimeter)
         {
             return input.Split(delimeter).ToFloats();
+        }
+
+        public static IEnumerable<(string, string)> ParseTuples(this string input, char listDelimeter, char tupleDelimeter)
+        {
+            foreach (string tuple in input.Split(listDelimeter))
+            {
+                string[] vals = tuple.Split(tupleDelimeter);
+
+                yield return (vals[0], vals[1]);
+            }
         }
 
         public static IEnumerable<string> SplitTopLevel(string input, char splitChar, char openParen, char closeParen)
