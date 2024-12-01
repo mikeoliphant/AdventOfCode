@@ -860,15 +860,19 @@ namespace AdventOfCode
             int height = maxY - minY + 1;
 
             Grid<T> grid = new Grid<T>(width, height);
+            grid.DefaultValue = DefaultValue;
+            grid.Fill(DefaultValue);
 
             T value = DefaultValue;
 
-            for (int y = 0; y < height; y++)
+            for (int y = minY; y <= maxY; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = minX; x <= maxX; x++)
                 {
                     if (TryGetValue(x, y, out value))
+                    {
                         grid[x - minX, y - minY] = value;
+                    }
                 }
             }
 
