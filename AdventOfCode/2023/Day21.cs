@@ -49,26 +49,41 @@
 
             var startPos = grid.FindValue('S').First();
 
-            grid[startPos] = '.';
+            DoSteps(64, startPos);
 
-            int size = 11;
+            outGrid.PrintToConsole();
 
-            Grid<char> newGrid = new(grid.Width * size, grid.Height * size);
+            long num = outGrid.FindValue('O').Count();
 
-            foreach (var cell in grid.GetAll())
+            return num;
+        }
+
+        long ComputeGrid(int numBlocks, Grid<char> baseGrid)
+        {
+            var startPos = baseGrid.FindValue('S').First();
+
+            baseGrid[startPos] = '.';
+
+            int size = 1 + (numBlocks * 2);
+
+            int numSteps = 65 + (numBlocks * 131);
+
+            Grid<char> newGrid = new(baseGrid.Width * size, baseGrid.Height * size);
+
+            foreach (var cell in baseGrid.GetAll())
             {
-                char value = grid[cell];
+                char value = baseGrid[cell];
 
                 for (int y = 0; y < size; y++)
                 {
                     for (int x = 0; x < size; x++)
                     {
-                        newGrid[(x * grid.Width) + cell.X, (y * grid.Height) + cell.Y] = value;
+                        newGrid[(x * baseGrid.Width) + cell.X, (y * baseGrid.Height) + cell.Y] = value;
                     }
                 }
             }
 
-            startPos = (((size / 2) * grid.Width) + startPos.X, ((size / 2) * grid.Height) + startPos.Y);
+            startPos = (((size / 2) * baseGrid.Width) + startPos.X, ((size / 2) * baseGrid.Height) + startPos.Y);
 
             newGrid[startPos] = 'S';
 
@@ -78,13 +93,46 @@
 
             outGrid = new Grid<char>(grid);
 
-            DoSteps(262, startPos);
+            DoSteps(numSteps, startPos);
 
-            //outGrid.PrintToConsole();
+            outGrid.DefaultValue = '.';
+
+            GridDisplay<char> display = new GridDisplay<char>(outGrid, outGrid.Width, outGrid.Height);
 
             long num = outGrid.FindValue('O').Count();
 
-            return num;
+            return ((numSteps + 1) * (numSteps + 1)) - num;
+        }
+
+        public override long Compute2()
+        {
+            ReadData();
+
+            long oneBlock = ComputeGrid(0, grid);
+
+            ReadData();
+
+            long twoBlock = ComputeGrid(1, grid);
+
+            ReadData();
+
+            long threeBlock = ComputeGrid(2, grid);
+
+            //long steps = 65 + 131;// 26501365;
+
+            //long square1Blocked = GetBlockedSquares(5);   // Just the values from the internal diamond
+
+            //long square2Blocked = GetBlockedSquares(65 + 131);   // The values from both the internal and outer diamonds
+
+            //long numSquareSteps = (steps - 65) / 131;
+
+            //long squaresPerSide = (numSquareSteps * 2);
+
+            //long totBlocked = square1Blocked + (squaresPerSide * 2 * square2Blocked);
+
+            //long tot = (steps + 1) * (steps + 1);
+
+            return 0; // tot - totBlocked;
         }
     }
 }

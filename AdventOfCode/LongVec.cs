@@ -178,6 +178,13 @@ namespace AdventOfCode
             yield return (this + new LongVec3(0, 0, -1));
         }
 
+        public void Divide(long val)
+        {
+            X /= val;
+            Y /= val;
+            Z /= val;
+        }
+
         public override bool Equals(object obj)
         {
             return (obj is LongVec3) && ((LongVec3)obj).Equals(this);
@@ -195,7 +202,7 @@ namespace AdventOfCode
 
         public static bool operator !=(LongVec3 v1, LongVec3 v2)
         {
-            return v1 != v2;
+            return !(v1.Equals(v2));
         }
 
         public static LongVec3 operator +(LongVec3 a, LongVec3 b) => new LongVec3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
