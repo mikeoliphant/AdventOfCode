@@ -78,45 +78,112 @@
             return path.Count - 1;
         }
 
+        Dictionary<(int X, int Y), List<((int X, int Y) Pos, int Dist)>> junctions = new();
+
+        ((int X, int Y) Pos, int Dist) FindEndpoint((int X, int Y) pos, (int X, int Y) lastPos)
+        {
+            if (junctions.ContainsKey(pos))
+                return (pos, 1);
+
+            var neighbors = grid.ValidNeighbors(pos.X, pos.Y).Where(g => (g != lastPos) && grid[g] != '#');
+
+            if (neighbors.Count() != 1)
+                throw new InvalidOperationException("Should only be one path");
+
+            var endpoint = FindEndpoint(neighbors.First(), pos);
+
+            return (endpoint.Pos, endpoint.Dist + 1);
+        }
+
+        void FindAllJunctions()
+        {
+            // Start
+            junctions[(1, 0)] = new();
+
+            // End
+            junctions[(grid.Width - 2, grid.Height - 1)] = new();
+
+            foreach (var pos in grid.GetAll())
+            {
+                if ((grid[pos] == '.') && (grid.ValidNeighborValues(pos.X, pos.Y).Count('.') == 0))
+                {
+                    junctions[pos] = new();
+                }
+            }
+
+            foreach (var junction in junctions.Keys)
+            {
+                foreach (var neighbor in grid.ValidNeighbors(junction.X, junction.Y))
+                {
+                    if (grid[neighbor] != '#')
+                    {
+                        junctions[junction].Add(FindEndpoint(neighbor, junction));
+                    }
+                }
+            }
+        }
+
         Dictionary<(int X, int Y), List<(int X, int Y)>> singlePaths = new();
         Queue<(List<(int X, int Y)> Visited, (int X, int Y) StartPos)> searchQueue = new();
+
+        long GetPathLength(List<(int X, int Y)> path)
+        {
+            long dist = 0;
+
+            (int X, int Y)? lastPos = null;
+
+            foreach (var pos in path)
+            {
+                if (lastPos != null)
+                {
+                    dist += junctions[lastPos.Value].Where(j => j.Pos == pos).First().Dist;
+                }
+
+                lastPos = pos;
+            }
+
+            return dist;
+        }
 
         List<(int X, int Y)> GetLongestPath2((int X, int Y) startPos)
         {
             searchQueue.Enqueue((new List<(int X, int Y)>(), startPos));
 
             List<(int X, int Y)> maxPath = null;
-            int maxPathLength = 0;
+            long maxPathLength = 0;
 
             while (searchQueue.Count > 0)
             {
                 var search = searchQueue.Dequeue();
 
+                if (!junctions.ContainsKey(search.StartPos))
+                {
+                    throw new InvalidOperationException("Not a junction!");
+                }
+
                 if ((search.StartPos.Y == (grid.Height - 1)) && (search.StartPos.X == (grid.Width - 2)))
                 {
-                    if (search.Visited.Count > maxPathLength)
+                    search.Visited.Add(search.StartPos);
+
+                    long length = GetPathLength(search.Visited);
+
+                    if (length > maxPathLength)
                     {
-                        maxPathLength = search.Visited.Count;
+                        maxPathLength = length;
                         maxPath = search.Visited;
                     }
 
                     continue;
                 }
 
-                foreach (var neighbor in grid.ValidNeighbors(search.StartPos.X, search.StartPos.Y))
+                foreach (var otherJunction in junctions[search.StartPos])
                 {
-                    if (search.Visited.Contains(neighbor)) continue;
-
-                    switch (grid[neighbor])
-                    {
-                        case '#':
-                            continue;
-                    }
+                    if (search.Visited.Contains(otherJunction.Pos)) continue;
 
                     var newVisited = new List<(int X, int Y)>(search.Visited);
                     newVisited.Add(search.StartPos);
 
-                    searchQueue.Enqueue((newVisited, neighbor));
+                    searchQueue.Enqueue((newVisited, otherJunction.Pos));
                 }
             }
 
@@ -127,11 +194,20 @@
         {
             ReadData();
 
+            FindAllJunctions();
+
+            //foreach (var pos in junctions.Keys)
+            //{
+            //    grid[pos] = '+';
+            //}
+
             //grid.PrintToConsole();
 
             var path = GetLongestPath2((1, 0));
 
-            return path.Count - 1;
+            long dist = GetPathLength(path);
+
+            return dist;
         }
     }
 }
