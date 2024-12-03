@@ -74,6 +74,17 @@ namespace AdventOfCode
             }
         }
 
+        public static bool StartsWith(this string str, string other, int startPosition)
+        {
+            for (int i = 0; i < other.Length; i++)
+            {
+                if (str[startPosition + i] != other[i])
+                    return false;
+            }
+
+            return true;
+        }
+
         public static IEnumerable<string> SplitTopLevel(string input, char splitChar, char openParen, char closeParen)
         {
             int nestLevel = 0;
