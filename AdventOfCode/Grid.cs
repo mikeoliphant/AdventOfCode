@@ -51,6 +51,14 @@ namespace AdventOfCode
                 yield return (x + 1, y + 1);
             }
         }
+
+        public static IEnumerable<(int X, int Y)> DiagonalNeighbors(int x, int y)
+        {
+            yield return (x - 1, y - 1);
+            yield return (x - 1, y + 1);
+            yield return (x + 1, y - 1);
+            yield return (x + 1, y + 1);
+        }
     }
 
     public class GridBase<T> : Grid, IEquatable<GridBase<T>>
@@ -327,6 +335,11 @@ namespace AdventOfCode
         public virtual IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
         {
             return AllNeighbors(x, y, includeDiagonal);
+        }
+
+        public virtual IEnumerable<(int X, int Y)> ValidDiagonalNeighbors(int x, int y)
+        {
+            return DiagonalNeighbors(x, y);
         }
 
         public virtual GridBase<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
@@ -628,6 +641,27 @@ namespace AdventOfCode
                     if (y < (Height - 1))
                         yield return (x + 1, y + 1);
                 }
+            }
+        }
+
+        public override IEnumerable<(int X, int Y)> ValidDiagonalNeighbors(int x, int y)
+        {
+            if (x > 0)
+            {
+                if (y > 0)
+                    yield return (x - 1, y - 1);
+
+                if (y < (Height - 1))
+                    yield return (x - 1, y + 1);
+            }
+
+            if (x < (Width - 1))
+            {
+                if (y > 0)
+                    yield return (x + 1, y - 1);
+
+                if (y < (Height - 1))
+                    yield return (x + 1, y + 1);
             }
         }
 
