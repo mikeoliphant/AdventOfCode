@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace AdventOfCode
 {
-    class PlotDrawable
+    public class PlotDrawable
     {
         public virtual void Draw(SKCanvas canvas)
         {
@@ -12,7 +12,7 @@ namespace AdventOfCode
         }
     }
 
-    class PlotPoints : PlotDrawable
+    public class PlotPoints : PlotDrawable
     {
         public SKPoint[] Points { get; set; }
         public SKColor Color { get; set; }
@@ -24,7 +24,7 @@ namespace AdventOfCode
         }
     }
 
-    class PlotLines : PlotDrawable
+    public class PlotLines : PlotDrawable
     {
         public (SKPoint Start, SKPoint End)[] Lines { get; set; }
         public SKPaint Paint { get; set;  }
@@ -61,18 +61,23 @@ namespace AdventOfCode
             })).Start();
         }
 
-        void AddPoints(IEnumerable<Vector2> points, SKColor color)
+        public void AddDrawable(PlotDrawable drawable)
         {
-            drawables.Add(new PlotPoints()
+            drawables.Add(drawable);
+        }
+
+        public void AddPoints(IEnumerable<Vector2> points, SKColor color)
+        {
+            AddDrawable(new PlotPoints()
             {
                 Points = points.Select(p => new SKPoint(p.X, p.Y)).ToArray(),
                 Color = color
             });
         }
 
-        void AddLines(IEnumerable<(Vector2 Start, Vector2 End)> lines, SKPaint paint)
+        public void AddLines(IEnumerable<(Vector2 Start, Vector2 End)> lines, SKPaint paint)
         {
-            drawables.Add(new PlotLines()
+            AddDrawable(new PlotLines()
             {
                 Lines = lines.Select(l => (new SKPoint(l.Start.X, l.Start.Y), new SKPoint(l.End.X, l.End.Y))).ToArray(),
                 Paint = paint

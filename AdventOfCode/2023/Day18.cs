@@ -91,7 +91,7 @@ namespace AdventOfCode._2023
 
             Grid<char> dugGrid = grid.ToGrid();
 
-            GridDisplay<char> display = new GridDisplay<char>(dugGrid, dugGrid.Width, dugGrid.Height);
+            GridDisplay display = new GridDisplay(dugGrid, dugGrid.Width, dugGrid.Height);
 
             long count = dugGrid.FindValue('#').LongCount();
 

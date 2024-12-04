@@ -1,9 +1,39 @@
 ﻿using System.Diagnostics;
+using System.Security.Policy;
 
 namespace AdventOfCode
 {
     public class Grid
     {
+        public virtual int Width { get { throw new NotImplementedException(); } }
+        public virtual int Height { get { throw new NotImplementedException(); } }
+
+        public bool IsValid(int x, int y)
+        {
+            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
+                return false;
+
+            return true;
+        }
+
+        public bool IsValid((int X, int Y) cell)
+        {
+            if ((cell.X < 0) || (cell.X >= Width) || (cell.Y < 0) || (cell.Y >= Height))
+                return false;
+
+            return true;
+        }
+
+        public virtual bool IsDefault(int x, int y)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual IEnumerable<(int X, int Y)> GetAll()
+        {
+            throw new NotImplementedException();
+        }
+
         public static IEnumerable<(int X, int Y)> GetRectangleInclusive(Rectangle rect)
         {
             for (int y = rect.Top; y <= rect.Bottom; y++)
@@ -59,6 +89,21 @@ namespace AdventOfCode
             yield return (x + 1, y - 1);
             yield return (x + 1, y + 1);
         }
+
+        public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y)
+        {
+            return ValidNeighbors(x, y, includeDiagonal: false);
+        }
+
+        public virtual IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
+        {
+            return AllNeighbors(x, y, includeDiagonal);
+        }
+
+        public virtual IEnumerable<(int X, int Y)> ValidDiagonalNeighbors(int x, int y)
+        {
+            return DiagonalNeighbors(x, y);
+        }
     }
 
     public class GridBase<T> : Grid, IEquatable<GridBase<T>>
@@ -94,6 +139,11 @@ namespace AdventOfCode
             {
                 this[pos.X, pos.Y] = value;
             }
+        }
+
+        public override bool IsDefault(int x, int y)
+        {
+            return this[x, y].Equals(DefaultValue);
         }
 
         public virtual bool Equals(GridBase<T> other)
@@ -244,11 +294,6 @@ namespace AdventOfCode
             return GetAllValues().Where(v => v.Equals(value)).LongCount();
         }
 
-        public virtual IEnumerable<(int X, int Y)> GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
         public virtual IEnumerable<T> GetAllValues()
         {
             foreach (var pos in GetAll())
@@ -327,21 +372,6 @@ namespace AdventOfCode
             return ValidNeighbors(x, y, includeDiagonal).Select(n => this[n.X, n.Y]);
         }
 
-        public IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y)
-        {
-            return ValidNeighbors(x, y, includeDiagonal: false);
-        }
-
-        public virtual IEnumerable<(int X, int Y)> ValidNeighbors(int x, int y, bool includeDiagonal)
-        {
-            return AllNeighbors(x, y, includeDiagonal);
-        }
-
-        public virtual IEnumerable<(int X, int Y)> ValidDiagonalNeighbors(int x, int y)
-        {
-            return DiagonalNeighbors(x, y);
-        }
-
         public virtual GridBase<T> CreateDataFromRows(IEnumerable<IEnumerable<T>> rows)
         {
             throw new NotImplementedException();
@@ -355,8 +385,8 @@ namespace AdventOfCode
 
     public class Grid<T> : GridBase<T>
     {
-        public int Width { get { return data.GetLength(0); } }
-        public int Height { get { return data.GetLength(1); } }
+        public override int Width { get { return data.GetLength(0); } }
+        public override int Height { get { return data.GetLength(1); } }
 
         T[,] data;
 
@@ -390,22 +420,6 @@ namespace AdventOfCode
             {
                 data[index1, index2] = value;
             }
-        }
-
-        public bool IsValid(int x, int y)
-        {
-            if ((x < 0) || (x >= Width) || (y < 0) || (y >= Height))
-                return false;
-
-            return true;
-        }
-
-        public bool IsValid((int X, int Y) cell)
-        {
-            if ((cell.X < 0) || (cell.X >= Width) || (cell.Y < 0) || (cell.Y >= Height))
-                return false;
-
-            return true;
         }
 
         public override T GetValue(int x, int y)

@@ -9,46 +9,32 @@ using System.Windows.Forms;
 
 namespace AdventOfCode
 {
-    public class GridDisplay<T>
+    public class GridDrawable : PlotDrawable
     {
-        Form form;
-        SKControl control;
-        GridBase<T> grid;
+        public Grid Grid { get; set; }
 
-        public GridDisplay(GridBase<T> grid, int width, int height)
+        public override void Draw(SKCanvas canvas)
         {
-            this.grid = grid;
-
-            form = new Form();
-            form.AutoSize = true;
-            form.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-
-            control = new SKControl();
-            control.Size = new Size(width, height);
-
-            control.PaintSurface += Control_PaintSurface;
-
-            form.Controls.Add(control);
-
-            new Thread(new ThreadStart(delegate
+            foreach (var pos in Grid.GetAll())
             {
-                Application.Run(form);
-            })).Start();
-        }
-
-        private void Control_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
-        {
-            SKCanvas canvas = e.Surface.Canvas;
-
-            canvas.Clear(SKColors.White);
-
-            foreach (var pos in grid.GetAll())
-            {
-                if (!grid[pos].Equals(grid.DefaultValue))
+                if (!Grid.IsDefault(pos.X, pos.Y))
                 {
                     canvas.DrawPoint(pos.X, pos.Y, SKColors.Black);
                 }
             }
+        }
+    }
+
+    public class GridDisplay : PlotDisplay
+    {
+        Grid grid;
+
+        public GridDisplay(Grid grid, int width, int height)
+            : base(width, height)
+        {
+            this.grid = grid;
+
+            AddDrawable(new GridDrawable { Grid = grid });
         }
     }
 

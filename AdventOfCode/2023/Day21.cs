@@ -97,7 +97,7 @@
 
             outGrid.DefaultValue = '.';
 
-            GridDisplay<char> display = new GridDisplay<char>(outGrid, outGrid.Width, outGrid.Height);
+            GridDisplay display = new GridDisplay(outGrid, outGrid.Width, outGrid.Height);
 
             long num = outGrid.FindValue('O').Count();
 
