@@ -42,6 +42,8 @@ namespace AdventOfCode
         SKControl control;
         List<PlotDrawable> drawables = new();
 
+        public SKMatrix Matrix { get; set; } = SKMatrix.Identity;
+
         public PlotDisplay(int width, int height)
         {
             form = new Form();
@@ -59,6 +61,14 @@ namespace AdventOfCode
             {
                 Application.Run(form);
             })).Start();
+        }
+
+        public void SetDisplayRegion(Vector2 min, Vector2 max)
+        {
+            float xScale = (float)control.Size.Width / (max.X - min.X);
+            float yScale = (float)control.Size.Height / (max.Y - min.Y);
+
+            Matrix = SKMatrix.Concat(SKMatrix.CreateScale(xScale, yScale), SKMatrix.CreateTranslation(-min.X, -min.Y));
         }
 
         public void AddDrawable(PlotDrawable drawable)
@@ -87,6 +97,11 @@ namespace AdventOfCode
         private void Control_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
+
+            canvas.SetMatrix(Matrix);
+
+            //canvas.SetMatrix(SKMatrix.Concat(SKMatrix.CreateScale(2, 2), SKMatrix.CreateTranslation(-(1024 / 2), -(800 / 2))));
+            //canvas.SetMatrix(SKMatrix.CreateScaleTranslation(2 , 2, -(1024 / 2), -(800 / 2)));
 
             canvas.Clear(SKColors.White);
 

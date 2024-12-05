@@ -1,4 +1,4 @@
-﻿using System.Security.Policy;
+﻿using SkiaSharp;
 
 namespace AdventOfCode._2023
 {
@@ -61,7 +61,7 @@ namespace AdventOfCode._2023
         }
 
         //BigInteger min = 7;
-        //BigInteger max = 27;                         
+        //BigInteger max = 27;
         BigInteger min = 200000000000000;
         BigInteger max = 400000000000000;
 
@@ -139,6 +139,22 @@ namespace AdventOfCode._2023
                     Console.WriteLine();
                 }
             }
+
+            return 0;
+        }
+
+        public override long Compute2()
+        {
+            ReadData();
+
+            long time = (long)min;
+
+            var lines = hailStones.Select(h => (new Vector2(h.Position.X, h.Position.Y), new Vector2(h.Position.X + (h.Velocity.X * time), h.Position.Y + (h.Velocity.Y * time))));
+
+            PlotDisplay plot = new PlotDisplay(1024, 800);
+            plot.SetDisplayRegion(new Vector2((float)min, (float)min), new Vector2((float)max, (float)max));
+
+            plot.AddLines(lines, new SKPaint { Color = SKColors.Black });
 
             return 0;
         }

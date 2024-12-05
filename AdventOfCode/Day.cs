@@ -1,4 +1,6 @@
-﻿namespace AdventOfCode
+﻿using System.Diagnostics;
+
+namespace AdventOfCode
 {
     internal class Day
     {
@@ -29,12 +31,43 @@
 
         public string DataFile
         {
-            get { return Path.Combine(DataFileDir, "Day" + DayNumber + ".txt"); }
+            get
+            {
+                string path = Path.Combine(DataFileDir, "Day" + DayNumber + ".txt");
+
+                //if (!File.Exists(path))
+                //{
+                //    string url = @"https://adventofcode.com/" + Year + "/day/" + DayNumber;
+
+                //    using (var client = new HttpClient())
+                //    {
+                //        using (var s = client.GetStreamAsync(url))
+                //        {
+                //            using (var fs = new FileStream(path, FileMode.Create))
+                //            {
+                //                s.Result.CopyTo(fs);
+                //            }
+                //        }
+                //    }
+                //}
+
+                return path;
+            }
         }
 
         public string DataFileTest
         {
-            get { return Path.Combine(DataFileDir, "Day" + DayNumber + "Test.txt"); }
+            get
+            {
+                string path = Path.Combine(DataFileDir, "Day" + DayNumber + "Test.txt");
+
+                if (!File.Exists(path))
+                {
+                    Process.Start("notepad.exe", path).WaitForExit();
+                }
+
+                return path;
+            }
         }
 
         public virtual long Compute()
