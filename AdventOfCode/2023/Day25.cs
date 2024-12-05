@@ -3,6 +3,9 @@
     internal class Day25 : Day
     {
         Dictionary<string, List<string>> components = new();
+        List<string> allComponents = null;
+        DijkstraSearch<string> search = null;
+
 
         void Link(string component1, string component2)
         {
@@ -28,6 +31,10 @@
                     Link(toComponent, fromTo[0]);
                 }
             }
+
+            allComponents = components.Keys.ToList();
+
+            search = new(GetNeighbors);
         }
 
         IEnumerable<KeyValuePair<string, float>> GetNeighbors(string state)
@@ -57,6 +64,31 @@
             }
         }
 
+        int CheckDisconnect(IEnumerable<(string, string)> toDisconnect)
+        {
+            foreach (var pair in toDisconnect)
+            {
+                components[pair.Item1].Remove(pair.Item2);
+                components[pair.Item2].Remove(pair.Item1);
+            }
+
+            string comp = allComponents[0];
+
+            int numConnected = 0;
+
+            for (int i = 1; i < allComponents.Count; i++)
+            {
+                var path = search.GetShortestPath(comp, allComponents[i]);
+
+                if (path.Path != null)
+                {
+                    numConnected++;
+                }
+            }
+
+            return numConnected + 1;
+        }
+
         public override long Compute()
         {
             ReadData();
@@ -68,8 +100,6 @@
             //long min = components.Values.Select(l => l.Count).Min();
 
             DijkstraSearch<string> search = new(GetNeighbors);
-
-            List<string> allComponents = components.Keys.ToList();
 
             long count = 0;
 
@@ -86,6 +116,7 @@
 
                     count++;
 
+                    // Run until we've got a decent amount of data
                     if (count > 50000)
                     {
                         i = allComponents.Count;
@@ -95,17 +126,19 @@
                 }
             }
 
+            // Find top 3 hot-path connections
             var sorted = pairCounts.OrderByDescending(p => p.Value).Take(3).ToList();
 
-            //using (StreamWriter writer = new StreamWriter(@"C:\tmp\sorted.txt"))
-            //{
-            //    foreach (var pair in sorted)
-            //    {
-            //        writer.WriteLine(pair.ToString());
-            //    }
-            //}
+            int numConnected = CheckDisconnect(sorted.Select(s => s.Key));
 
-            return sorted.Count;
+            if (numConnected == allComponents.Count)
+            {
+                throw new InvalidOperationException("Disconnect didn't work");
+            }
+
+            int val = numConnected * (allComponents.Count - numConnected);
+
+            return val;
         }
     }
 }
