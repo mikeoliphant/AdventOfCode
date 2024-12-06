@@ -11,14 +11,14 @@
 
         IEnumerable<(int X, int Y)> GetVisited()
         {
-            LongVec2 pos = grid.FindValue('^').Select(p => new LongVec2(p.X, p.Y)).First();
+            IntVec2 pos = grid.FindValue('^').Select(p => new IntVec2(p.X, p.Y)).First();
             int facing = 0;
 
             do
             {
                 grid[(int)pos.X, (int)pos.Y] = 'X';
 
-                LongVec2 next = pos;
+                IntVec2 next = pos;
                 next.AddFacing(facing, 1);
 
                 if (!grid.IsValid((int)next.X, (int)next.Y))
@@ -38,15 +38,15 @@
             return grid.FindValue('X');
         }
 
-        bool IsLoop(LongVec2 pos, int facing)
+        bool IsLoop(IntVec2 pos, int facing)
         {
-            HashSet<(LongVec2, int)> visited = new();
+            HashSet<(IntVec2, int)> visited = new();
 
             do
             {
-                grid[(int)pos.X, (int)pos.Y] = 'X';
+                grid[pos.X, pos.Y] = 'X';
 
-                LongVec2 next = pos;
+                IntVec2 next = pos;
                 next.AddFacing(facing, 1);
 
                 if (visited.Contains((next, facing)))
@@ -59,7 +59,7 @@
 
                 if (grid[(int)next.X, (int)next.Y] == '#')
                 {
-                    facing = LongVec2.TurnFacing(facing, 1);
+                    facing = IntVec2.TurnFacing(facing, 1);
                 }
                 else
                 {
@@ -103,7 +103,7 @@
             {
                 grid[pos] = '#';
 
-                if (IsLoop(new LongVec2(start), 0))
+                if (IsLoop(new IntVec2(start), 0))
                 {
                     loops++;
                 }
