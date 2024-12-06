@@ -2,7 +2,7 @@
 
 namespace AdventOfCode
 {
-    struct LongVec2 : IEquatable<LongVec2>
+    public struct LongVec2 : IEquatable<LongVec2>
     {
         public long X { get; set; }
         public long Y { get; set; }
@@ -14,6 +14,12 @@ namespace AdventOfCode
         }
 
         public LongVec2((long X, long Y) pos)
+        {
+            this.X = pos.X;
+            this.Y = pos.Y;
+        }
+
+        public LongVec2((int X, int Y) pos)
         {
             this.X = pos.X;
             this.Y = pos.Y;
@@ -92,6 +98,7 @@ namespace AdventOfCode
 
         public void AddFacing(int facing, long amount)
         {
+            // Start with 0 being up, and go clockwise
             switch (facing)
             {
                 case 0:

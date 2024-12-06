@@ -36,6 +36,18 @@ namespace AdventOfCode
         }
     }
 
+    public class PlotRects : PlotDrawable
+    {
+        public SKRect[] Rects { get; set; }
+        public SKPaint Paint { get; set; }
+
+        public override void Draw(SKCanvas canvas)
+        {
+            foreach (var rect in Rects)
+                canvas.DrawRect(rect, Paint);
+        }
+    }
+
     public class PlotDisplay
     {
         Form form;
@@ -94,14 +106,20 @@ namespace AdventOfCode
             });
         }
 
+        public void AddRects(IEnumerable<(Vector2 Min, Vector2 Max)> rects, SKPaint paint)
+        {
+            AddDrawable(new PlotRects()
+            {
+                Rects = rects.Select(r => (new SKRect(r.Min.X, r.Min.Y, r.Max.X, r.Max.Y))).ToArray(),
+                Paint = paint
+            });
+        }
+
         private void Control_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
         {
             SKCanvas canvas = e.Surface.Canvas;
 
             canvas.SetMatrix(Matrix);
-
-            //canvas.SetMatrix(SKMatrix.Concat(SKMatrix.CreateScale(2, 2), SKMatrix.CreateTranslation(-(1024 / 2), -(800 / 2))));
-            //canvas.SetMatrix(SKMatrix.CreateScaleTranslation(2 , 2, -(1024 / 2), -(800 / 2)));
 
             canvas.Clear(SKColors.White);
 

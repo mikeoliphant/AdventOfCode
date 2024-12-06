@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
+﻿using SkiaSharp;
 
 namespace AdventOfCode._2023
 {
@@ -128,90 +127,98 @@ namespace AdventOfCode._2023
             }
         }
 
+        List<LineHV> lines = new();
+
         public override long Compute2()
         {
             SparseGrid<char> grid = new();
             grid.DefaultValue = '.';
 
-            var instructions = GetInstructions(DataFileTest);
+            var instructions = GetInstructions2(DataFile);
 
-            Dictionary<(int X, int Y), int> hDict = new();
+            LongVec2 cell = new LongVec2(0, 0);
 
-            List<(int X, int Y, int Height)> vertList = new();
-
-            (int X, int Y) cell = (0, 0);
+            long dugCount = 0;
 
             foreach (var instruction in instructions)
             {
-                if (instruction.DY != 0)
-                {
-                    int ny = instruction.DY * instruction.Dist;
+                LongVec2 next = cell + (new LongVec2(instruction.DX, instruction.DY) * instruction.Dist);
 
-                    if (ny > 0)
-                        vertList.Add((cell.X, cell.Y, ny));
-                    else
-                        vertList.Add((cell.X, cell.Y + ny, -ny));
+                lines.Add(new LineHV(cell, next));
 
-                    cell = (cell.X, cell.Y + ny);
-                }
-                else
-                {
-                    int nx = instruction.DX * instruction.Dist;
-
-                    if (nx > 0)
-                        hDict[(cell.X, cell.Y)] = nx;
-                    else
-                        hDict[(cell.X + nx, cell.Y)] = -nx;
-
-                    cell = (cell.X + nx, cell.Y);
-                }
-
-                grid[cell] = '#';
+                cell = next;
             }
 
-            var rowsOfInterest = hDict.Keys.Select(h => h.Y).Distinct().Order();
+            PlotDisplay plot = new PlotDisplay(1024, 800);
 
-            int? lastRow = null;
+            float min = lines.Select(l => l.Range.Min).Min();
+            float max = lines.Select(l => l.Range.Max).Max();
 
-            long totInterior = 0;
+            float delta = max - min;
 
-            int numInterior = 0;
+            min -= (delta * 0.1f);
+            max += (delta * 0.1f);
 
-            foreach (int row in rowsOfInterest)
+            plot.SetDisplayRegion(new Vector2(min, min), new Vector2(max, max));
+
+            var drawLines = lines.Select(l => l.IsVertical ?
+                (new Vector2(l.AxisValue, l.Range.Min), new Vector2(l.AxisValue, l.Range.Max)) :
+                (new Vector2(l.Range.Min, l.AxisValue), new Vector2(l.Range.Max, l.AxisValue))).ToList();
+
+            plot.AddLines(drawLines, new SKPaint { Color = SKColors.Black });
+
+            List<long> yVals = new();
+
+            foreach (var line in lines)
             {
-                if (lastRow.HasValue)
+                if (line.IsVertical)
                 {
-                    totInterior += (row - lastRow.Value) * numInterior;
-
-                    numInterior = 0;
-                }
-
-                lastRow = row;
-
-                var cols = vertList.Where(v => (row >= v.Y) && (row < (v.Y + v.Height))).Select(v => v.X).Order();
-
-                int? lastCol = null;
-
-                foreach (int col in cols)
-                {
-                    if (lastCol.HasValue)
-                    {
-                        int diff = col - lastCol.Value;
-
-                        numInterior += (diff + 1);
-
-                        lastCol = null;
-                    }
-                    else
-                    {
-                        lastCol = col;
-                    }
+                    yVals.Add(line.Range.Min);
+                    yVals.Add(line.Range.Max);
                 }
             }
 
-            grid.PrintToConsole();
+            yVals = yVals.Distinct().Order().ToList();
 
-            return 0;
+            var horizLines = yVals.Select(y => (new Vector2(min, y), new Vector2(max, y)));
+
+            //plot.AddLines(horizLines, new SKPaint { Color = new SKColor(255, 0, 0, 128) });
+
+            long? lastY = null;
+
+            List<(Vector2, Vector2)> rects = new();
+
+            foreach (long y in yVals)
+            {
+                if (lastY != null)
+                {
+                    int crossCount = 0;
+
+                    long lastCross = 0;
+
+                    foreach (var cross in lines.Where(l => (l.IsVertical && (l.Range.Min <= lastY) && l.Range.Max >= y)).OrderBy(l => l.AxisValue))
+                    {
+                        crossCount++;
+
+                        if ((crossCount % 2) == 0)
+                        {
+                            // Every other cross
+
+                            dugCount += (cross.AxisValue - lastCross + 1) * (y - lastY.Value + 1);
+
+                            rects.Add((new Vector2(lastCross, lastY.Value), new Vector2(cross.AxisValue, y)));
+                        }
+
+                        lastCross = cross.AxisValue;
+                    }
+                }
+
+                lastY = y;
+            }
+
+            plot.AddRects(rects, new SKPaint { Color = new SKColor(255, 255, 0, 128) });
+
+            return dugCount;
         }
     }
 }

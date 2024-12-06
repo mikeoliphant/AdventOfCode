@@ -8,15 +8,15 @@ namespace AdventOfCode
 {
     public struct Range
     {
-        public int Min { get; set; }
-        public int Max { get; set; }
+        public long Min { get; set; }
+        public long Max { get; set; }
 
         public bool IsEmpty()
         {
             return Min > Max;
         }
 
-        public int Size()
+        public long Size()
         {
             if (IsEmpty())
                 return 0;
@@ -24,7 +24,7 @@ namespace AdventOfCode
             return (Max - Min) + 1;
         }
 
-        public Range(int min, int max)
+        public Range(long min, long max)
         {
             this.Min = min;
             this.Max = max;
@@ -35,12 +35,12 @@ namespace AdventOfCode
             return Min + ".." + Max;
         }
 
-        public Range Below(int splitVal)
+        public Range Below(long splitVal)
         {
             return new Range(Min, splitVal - 1);
         }
 
-        public Range Above(int splitVal)
+        public Range Above(long splitVal)
         {
             return new Range(splitVal + 1, Max);
         }
@@ -56,6 +56,31 @@ namespace AdventOfCode
                 return new Range(Min, otherRange.Min - 1);
 
             return new Range(otherRange.Max + 1, Max);
+        }
+
+        public IEnumerable<Range> GetDisjointFrom(Range otherRange)
+        {
+            if ((Max < otherRange.Min) || (Min > otherRange.Max))
+            {
+                yield return this;
+            }
+            else
+            {
+                if (Min < otherRange.Min)
+                {
+                    yield return new Range(Min, otherRange.Min - 1);
+                }
+
+                if (Max > otherRange.Max)
+                {
+                    yield return new Range(otherRange.Max + 1, Max);
+                }
+            }
+        }
+
+        public bool Contains(long value)
+        {
+            return value >= Min && value <= Max;
         }
     }
 }
