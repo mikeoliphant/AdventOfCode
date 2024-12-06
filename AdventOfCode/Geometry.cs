@@ -1,4 +1,7 @@
-﻿namespace AdventOfCode
+﻿global using IntRect = AdventOfCode.Rect<int>;
+global using LongRect = AdventOfCode.Rect<long>;
+
+namespace AdventOfCode
 {
     /// <summary>
     /// A 2D line segment which is either horizontal or vertical
@@ -137,6 +140,99 @@
                     yield return this;
                 }
             }
+        }
+    }
+
+    public class AreaCalculator<T> where T : INumber<T>, IMinMaxValue<T>, IEquatable<T>
+    {
+        private List<Rect<T>> rectangles = new();
+
+        public AreaCalculator(List<Rect<T>> rectangles)
+        {
+            this.rectangles = rectangles;
+        }
+
+        public T Calculate()
+        {
+            T area = T.Zero;
+
+            for (int rectangle = 0; rectangle < rectangles.Count; rectangle++)
+                area += Calculate(rectangles[rectangle], T.One, rectangle + 1);
+
+            return area;
+        }
+
+        //A depth-first search for overlaps.
+        //Each consecutive overlap alternates inclusionExclusion.
+        private T Calculate(Rect<T> currentRectangle, T inclusionExclusion, int nextRectangle)
+        {
+            T area = currentRectangle.Area() * inclusionExclusion;
+
+            for (; nextRectangle < rectangles.Count; nextRectangle++)
+            {
+                Rect<T>? overlap = currentRectangle.FindOverlap(rectangles[nextRectangle]);
+
+                if (overlap != null)
+                    area += Calculate(overlap.Value, inclusionExclusion * -T.One, nextRectangle + 1);
+            }
+
+            return area;
+        }
+    }
+
+    public struct Rect<T> : IEquatable<Rect<T>> where T : INumber<T>, IMinMaxValue<T>, IEquatable<T>
+    {
+        public T X { get; set; }
+        public T Y { get; set; }
+        public T Width { get; set; }
+        public T Height { get; set; }
+
+        public Rect(T x, T y, T width, T height)
+        {
+            this.X = x;
+            this.Y = y;
+            this.Width = width;
+            this.Height = height;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is Rect<T>) && this.Equals(((Rect<T>)obj));
+        }
+
+        public bool Equals(Rect<T> other)
+        {
+            return (X == other.X) && (Y == other.Y) && (Width == other.Width) && (Height == other.Height);
+        }
+
+        public static bool operator ==(Rect<T> v1, Rect<T> v2)
+        {
+            return v1.Equals(v2);
+        }
+
+        public static bool operator !=(Rect<T> v1, Rect<T> v2)
+        {
+            return !v1.Equals(v2);
+        }
+
+        public T Area()
+        {
+            return Width * Height;
+        }
+
+        public Rect<T>? FindOverlap(Rect<T> other)
+        {
+            T left = T.Max(this.X, other.X);
+            T right = T.Min(this.X + this.Width, other.X + other.Width);
+            T bottom = T.Max(this.Y, other.Y);
+            T top = T.Min(this.Y + this.Height, other.Y + other.Height);
+            T height = top - bottom;
+            T width = right - left;
+
+            if (height > T.Zero && width > T.Zero) //If both are positive, there is overlap.
+                return new Rect<T>(left, bottom, width, height);
+
+            return null;
         }
     }
 }

@@ -138,8 +138,6 @@ namespace AdventOfCode._2023
 
             LongVec2 cell = new LongVec2(0, 0);
 
-            long dugCount = 0;
-
             foreach (var instruction in instructions)
             {
                 LongVec2 next = cell + (new LongVec2(instruction.DX, instruction.DY) * instruction.Dist);
@@ -186,7 +184,7 @@ namespace AdventOfCode._2023
 
             long? lastY = null;
 
-            List<(Vector2, Vector2)> rects = new();
+            List<LongRect> rects = new();
 
             foreach (long y in yVals)
             {
@@ -204,9 +202,7 @@ namespace AdventOfCode._2023
                         {
                             // Every other cross
 
-                            dugCount += (cross.AxisValue - lastCross + 1) * (y - lastY.Value + 1);
-
-                            rects.Add((new Vector2(lastCross, lastY.Value), new Vector2(cross.AxisValue, y)));
+                            rects.Add(new LongRect(lastCross, lastY.Value, cross.AxisValue - lastCross + 1, y - lastY.Value + 1));
                         }
 
                         lastCross = cross.AxisValue;
@@ -216,7 +212,11 @@ namespace AdventOfCode._2023
                 lastY = y;
             }
 
-            plot.AddRects(rects, new SKPaint { Color = new SKColor(255, 255, 0, 128) });
+            plot.AddRects(rects.Select(r => (new Vector2(r.X, r.Y), new Vector2(r.X + r.Width, r.Y + r.Height))), new SKPaint { Color = new SKColor(255, 255, 0, 128) });
+
+            AreaCalculator<long> calc = new(rects);
+
+            long dugCount = calc.Calculate();
 
             return dugCount;
         }
