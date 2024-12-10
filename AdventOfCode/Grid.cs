@@ -381,6 +381,11 @@ namespace AdventOfCode
         {
             throw new NotImplementedException();
         }
+
+        public virtual void PrintToConsole(Func<T, string> format)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class Grid<T> : GridBase<T>
@@ -710,6 +715,21 @@ namespace AdventOfCode
                 for (int x = 0; x < Width; x++)
                 {
                     Console.Write(data[x, y]);
+                }
+
+                Console.WriteLine();
+            }
+
+            Console.WriteLine();
+        }
+
+        public override void PrintToConsole(Func<T, string> format)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    Console.Write(format(data[x, y]));
                 }
 
                 Console.WriteLine();
