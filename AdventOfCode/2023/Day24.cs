@@ -65,6 +65,67 @@ namespace AdventOfCode._2023
         BigInteger min = 200000000000000;
         BigInteger max = 400000000000000;
 
+        (double X, double Y)? Intersect(HailStone hailStone1, HailStone hailStone2)
+        {
+            //Console.WriteLine("Hailstone A: " + hailStone1);
+            //Console.WriteLine("Hailstone B: " + hailStone2);
+
+            Ray2D ray1 = new Ray2D(hailStone1.PositionXY, hailStone1.PositionXY + hailStone1.VelocityXY);
+            Ray2D ray2 = new Ray2D(hailStone2.PositionXY, hailStone2.PositionXY + hailStone2.VelocityXY);
+
+            var intersect = Ray2D.Intersect(ray1, ray2);
+
+            if (intersect.Det != 0)
+            {
+                //Console.WriteLine("Intersect is: " + ((double)intersect.Point.X / (double)intersect.Det) + "," + ((double)intersect.Point.Y / (double)intersect.Det));
+
+                bool inside = false;
+
+                // Flip signs if we multiplied by a negative
+                if (intersect.Det > 0)
+                {
+                    inside = (intersect.Point.X >= (min * intersect.Det)) && (intersect.Point.X <= (max * intersect.Det)) && (intersect.Point.Y >= (min * intersect.Det)) && (intersect.Point.Y <= (max * intersect.Det));
+                }
+                else
+                {
+                    inside = (intersect.Point.X <= (min * intersect.Det)) && (intersect.Point.X >= (max * intersect.Det)) && (intersect.Point.Y <= (min * intersect.Det)) && (intersect.Point.Y >= (max * intersect.Det));
+                }
+
+                if (inside)
+                {
+                    //Console.WriteLine("**inside");
+
+                    int signX1 = (intersect.Point.X - (hailStone1.Position.X * intersect.Det)).Sign;
+
+                    // Flip signs if we multiplied by a negative
+                    if (intersect.Det < 0)
+                        signX1 = -signX1;
+
+                    if (signX1 != Math.Sign(hailStone1.Velocity.X))
+                    {
+                        return null;
+                    }
+
+                    int signX2 = (intersect.Point.X - (hailStone2.Position.X * intersect.Det)).Sign;
+
+                    // Flip signs if we multiplied by a negative
+                    if (intersect.Det < 0)
+                        signX2 = -signX2;
+
+                    if (signX2 != Math.Sign(hailStone2.Velocity.X))
+                    {
+                        return null;
+                    }
+
+                    return ((double)intersect.Point.X / (double)intersect.Det, (double)intersect.Point.Y / (double)intersect.Det);
+                }
+            }
+
+            //Console.WriteLine("** Parallel **");
+
+            return null;
+        }
+
         public override long Compute()
         {
             ReadData();
@@ -78,83 +139,44 @@ namespace AdventOfCode._2023
                     HailStone hailStone1 = hailStones[h1];
                     HailStone hailStone2 = hailStones[h2];
 
-                    Console.WriteLine("Hailstone A: " + hailStone1);
-                    Console.WriteLine("Hailstone B: " + hailStone2);
+                    var intersect = Intersect(hailStone1, hailStone2);
 
-                    Ray2D ray1 = new Ray2D(hailStone1.PositionXY, hailStone1.PositionXY + hailStone1.VelocityXY);
-                    Ray2D ray2 = new Ray2D(hailStone2.PositionXY, hailStone2.PositionXY + hailStone2.VelocityXY);
-
-                    var intersect = Ray2D.Intersect(ray1, ray2);
-
-                    if (intersect.Det != 0)
-                    {
-                        Console.WriteLine("Intersect is: " + ((double)intersect.Point.X / (double)intersect.Det) + "," + ((double)intersect.Point.Y / (double)intersect.Det));
-
-                        bool inside = false;
-
-                        // Flip signs if we multiplied by a negative
-                        if (intersect.Det > 0)
-                        {
-                            inside = (intersect.Point.X >= (min * intersect.Det)) && (intersect.Point.X <= (max * intersect.Det)) && (intersect.Point.Y >= (min * intersect.Det)) && (intersect.Point.Y <= (max * intersect.Det));
-                        }
-                        else
-                        {
-                            inside = (intersect.Point.X <= (min * intersect.Det)) && (intersect.Point.X >= (max * intersect.Det)) && (intersect.Point.Y <= (min * intersect.Det)) && (intersect.Point.Y >= (max * intersect.Det));
-                        }
-
-                        if (inside)
-                        {
-                            Console.WriteLine("**inside");
-
-                            int signX1 = (intersect.Point.X - (hailStone1.Position.X * intersect.Det)).Sign;
-
-                            // Flip signs if we multiplied by a negative
-                            if (intersect.Det < 0)
-                                signX1 = -signX1;
-
-                            if (signX1 != Math.Sign(hailStone1.Velocity.X))
-                            {
-                                continue;
-                            }
-
-                            int signX2 = (intersect.Point.X - (hailStone2.Position.X * intersect.Det)).Sign;
-
-                            // Flip signs if we multiplied by a negative
-                            if (intersect.Det < 0)
-                                signX2 = -signX2;
-
-                            if (signX2 != Math.Sign(hailStone2.Velocity.X))
-                            {
-                                continue;
-                            }
-
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("** Parallel **");
-                    }
-
-                    Console.WriteLine();
+                    if (intersect != null)
+                        count++;
                 }
             }
 
-            return 0;
+            return count;
         }
 
         public override long Compute2()
         {
             ReadData();
 
-            long time = (long)min;
+            long maxDist = 0;
+            (int, int, (double, double)) max = new();
 
-            var lines = hailStones.Select(h => (new Vector2(h.Position.X, h.Position.Y), new Vector2(h.Position.X + (h.Velocity.X * time), h.Position.Y + (h.Velocity.Y * time))));
+            for (int h1 = 0; h1 < hailStones.Count; h1++)
+            {
+                for (int h2 = h1 + 1; h2 < hailStones.Count; h2++)
+                {
+                    HailStone hailStone1 = hailStones[h1];
+                    HailStone hailStone2 = hailStones[h2];
 
-            PlotDisplay plot = new PlotDisplay(1024, 800);
-            plot.SetDisplayRegion(new Vector2((float)min, (float)min), new Vector2((float)max, (float)max));
+                    var intersect = Intersect(hailStone1, hailStone2);
 
-            plot.AddLines(lines, new SKPaint { Color = SKColors.Black });
+                    if (intersect != null)
+                    {
+                        long dist = hailStone1.VelocityXY.ManhattanDistance(hailStone2.VelocityXY);
+
+                        if (dist > maxDist)
+                        {
+                            maxDist = dist;
+                            max = (h1, h2, intersect.Value);
+                        }
+                    }
+                }
+            }
 
             return 0;
         }
