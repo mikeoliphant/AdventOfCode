@@ -143,6 +143,34 @@ namespace AdventOfCode
         }
     }
 
+    public class Ray2D<T> where T : INumber<T>, IMinMaxValue<T>, IEquatable<T>
+    {
+        public T A;
+        public T B;
+        public T C;
+
+        public Ray2D(Vec2<T> p1, Vec2<T> p2)
+        {
+            this.A = p2.Y - p1.Y;
+            this.B = p1.X - p2.X;
+            this.C = (this.A * p1.X) + (this.B * p1.Y);
+        }
+
+        public static ((T X, T Y) Point, T Det) Intersect(Ray2D<T> ray1, Ray2D<T> ray2)
+        {
+            T det = (ray1.A * ray2.B) - (ray2.A * ray1.B);
+
+            if (det.Equals(T.Zero))
+            {
+                return ((T.Zero, T.Zero), T.Zero);
+            }
+
+            return (((ray2.B * ray1.C) - (ray1.B * ray2.C), (ray1.A * ray2.C) - (ray2.A * ray1.C)), det);
+        }
+    }
+
+
+
     public class AreaCalculator<T> where T : INumber<T>, IMinMaxValue<T>, IEquatable<T>
     {
         private List<Rect<T>> rectangles = new();

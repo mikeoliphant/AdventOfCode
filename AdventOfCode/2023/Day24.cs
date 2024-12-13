@@ -18,32 +18,6 @@ namespace AdventOfCode._2023
             }
         }
 
-        class Ray2D
-        {
-            public BigInteger A;
-            public BigInteger B;
-            public BigInteger C;
-
-            public Ray2D(LongVec2 p1, LongVec2 p2)
-            {
-                this.A = (BigInteger)p2.Y - (BigInteger)p1.Y;
-                this.B = (BigInteger)p1.X - (BigInteger)p2.X;
-                this.C = (this.A * (BigInteger)p1.X) + (this.B * (BigInteger)p1.Y);
-            }
-
-            public static ((BigInteger X, BigInteger Y) Point, BigInteger Det)  Intersect(Ray2D ray1, Ray2D ray2)
-            {
-                BigInteger det = (ray1.A * ray2.B) - (ray2.A * ray1.B);
-
-                if (det == 0)
-                {
-                    return ((0, 0), 0);
-                }
-
-                return (((ray2.B * ray1.C) - (ray1.B * ray2.C), (ray1.A * ray2.C) - (ray2.A * ray1.C)), det);
-            }
-        }
-
         List<HailStone> hailStones = new();
 
         void ReadData()
@@ -70,10 +44,10 @@ namespace AdventOfCode._2023
             //Console.WriteLine("Hailstone A: " + hailStone1);
             //Console.WriteLine("Hailstone B: " + hailStone2);
 
-            Ray2D ray1 = new Ray2D(hailStone1.PositionXY, hailStone1.PositionXY + hailStone1.VelocityXY);
-            Ray2D ray2 = new Ray2D(hailStone2.PositionXY, hailStone2.PositionXY + hailStone2.VelocityXY);
+            Ray2D<long> ray1 = new (hailStone1.PositionXY, hailStone1.PositionXY + hailStone1.VelocityXY);
+            Ray2D<long> ray2 = new (hailStone2.PositionXY, hailStone2.PositionXY + hailStone2.VelocityXY);
 
-            var intersect = Ray2D.Intersect(ray1, ray2);
+            var intersect = Ray2D<long>.Intersect(ray1, ray2);
 
             if (intersect.Det != 0)
             {
@@ -95,7 +69,7 @@ namespace AdventOfCode._2023
                 {
                     //Console.WriteLine("**inside");
 
-                    int signX1 = (intersect.Point.X - (hailStone1.Position.X * intersect.Det)).Sign;
+                    int signX1 = Math.Sign((intersect.Point.X - (hailStone1.Position.X * intersect.Det)));
 
                     // Flip signs if we multiplied by a negative
                     if (intersect.Det < 0)
@@ -106,7 +80,7 @@ namespace AdventOfCode._2023
                         return null;
                     }
 
-                    int signX2 = (intersect.Point.X - (hailStone2.Position.X * intersect.Det)).Sign;
+                    int signX2 = Math.Sign(intersect.Point.X - (hailStone2.Position.X * intersect.Det));
 
                     // Flip signs if we multiplied by a negative
                     if (intersect.Det < 0)

@@ -115,38 +115,12 @@ namespace AdventOfCode._2024
             return min;
         }
 
-        class Ray2D
-        {
-            public BigInteger A;
-            public BigInteger B;
-            public BigInteger C;
-
-            public Ray2D(LongVec2 p1, LongVec2 p2)
-            {
-                this.A = (BigInteger)p2.Y - (BigInteger)p1.Y;
-                this.B = (BigInteger)p1.X - (BigInteger)p2.X;
-                this.C = (this.A * (BigInteger)p1.X) + (this.B * (BigInteger)p1.Y);
-            }
-
-            public static ((BigInteger X, BigInteger Y) Point, BigInteger Det) Intersect(Ray2D ray1, Ray2D ray2)
-            {
-                BigInteger det = (ray1.A * ray2.B) - (ray2.A * ray1.B);
-
-                if (det == 0)
-                {
-                    return ((0, 0), 0);
-                }
-
-                return (((ray2.B * ray1.C) - (ray1.B * ray2.C), (ray1.A * ray2.C) - (ray2.A * ray1.C)), det);
-            }
-        }
-
         long GetMinTokens3(ClawMachine machine)
         {
-            Ray2D aRay = new Ray2D(LongVec2.Zero, machine.A);
-            Ray2D bRay = new Ray2D(machine.Prize, machine.Prize - machine.B);
+            Ray2D<long> aRay = new (LongVec2.Zero, machine.A);
+            Ray2D<long> bRay = new (machine.Prize, machine.Prize - machine.B);
 
-            var intersect = Ray2D.Intersect(aRay, bRay);
+            var intersect = Ray2D<long>.Intersect(aRay, bRay);
 
             if ((intersect.Point.X % intersect.Det) == 0)
             {
