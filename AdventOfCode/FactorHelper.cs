@@ -2,9 +2,9 @@
 {
     public static class FactorHelper
     {
-        public static IEnumerable<(int, int)> PrimeFactors(int n)
+        public static IEnumerable<(long, long)> PrimeFactors(long n)
         {
-            int num2 = 0;
+            long num2 = 0;
 
             while (n % 2 == 0)
             {
@@ -16,9 +16,9 @@
             if (num2 > 0)
                 yield return (2, num2);
 
-            for (int i = 3; i <= Math.Sqrt(n); i += 2)
+            for (long i = 3; i <= Math.Sqrt(n); i += 2)
             {
-                int numI = 0;
+                long numI = 0;
 
                 while (n % i == 0)
                 {
@@ -35,25 +35,25 @@
                 yield return (n, 1);
         }
 
-        public static IEnumerable<int> AllFactors(int n)
+        public static IEnumerable<long> AllFactors(long n)
         {
             var factors = PrimeFactors(n).ToList();
 
             if (factors.Count == 0)
-                return new List<int> { n };
+                return new List<long> { n };
             else
             {
                 return GetFactorCombos(factors, 0);
             }
         }
 
-        static IEnumerable<int> GetFactorCombos(List<(int Factor, int NumTimes)> factors, int pos)
+        static IEnumerable<long> GetFactorCombos(List<(long Factor, long NumTimes)> factors, int pos)
         {
             if (pos == (factors.Count - 1))
             {
                 for (int i = 0; i <= factors[pos].NumTimes; i++)
                 {
-                    yield return (int)Math.Pow(factors[pos].Factor, i);
+                    yield return (long)Math.Pow(factors[pos].Factor, i);
                 }
             }
             else
@@ -62,7 +62,7 @@
                 {
                     for (int i = 0; i <= factors[pos].NumTimes; i++)
                     {
-                        yield return (int)Math.Pow(factors[pos].Factor, i) * combo;
+                        yield return (long)Math.Pow(factors[pos].Factor, i) * combo;
                     }
                 }
             }
