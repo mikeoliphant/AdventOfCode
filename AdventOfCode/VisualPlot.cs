@@ -75,6 +75,11 @@ namespace AdventOfCode
             })).Start();
         }
 
+        public void ReDraw()
+        {
+            control.Invalidate();
+        }
+
         public void SetDisplayRegion(Vector2 min, Vector2 max)
         {
             float xScale = (float)control.Size.Width / (max.X - min.X);
