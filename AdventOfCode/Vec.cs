@@ -6,7 +6,13 @@ global using LongVec3 = AdventOfCode.Vec3<long>;
 
 namespace AdventOfCode
 {
-    public struct Vec2<T> : IEquatable<Vec2<T>> where T : INumber<T>, IMinMaxValue<T>, IEquatable<T>
+    public interface IPos2D<T>
+    {
+        public T X { get; }
+        public T Y { get; }
+    }
+
+    public struct Vec2<T> : IEquatable<Vec2<T>>, IPos2D<T> where T : INumber<T>, IMinMaxValue<T>, IEquatable<T>
     {
         public T X { get; set; }
         public T Y { get; set; }
@@ -105,6 +111,43 @@ namespace AdventOfCode
         {
             return ModHelper.PosMod(facing + rotation, 4);
         }
+
+        public static int GetFacing(char facingChar)
+        {
+            switch (facingChar)
+            {
+                case '^':
+                    return 0;
+                case '>':
+                    return 1;
+                case 'v':
+                    return 2;
+                case '<':
+                    return 3;
+                default:
+                    throw new Exception("Facing must be one of: [^>v<]");
+
+            }
+        }
+
+        public static Vec2<T> GetFacingVector(char facingChar)
+        {
+            switch (facingChar)
+            {
+                case '^':
+                    return new Vec2<T>(T.Zero, -T.One);
+                case '>':
+                    return new Vec2<T>(T.One, T.Zero);
+                case 'v':
+                    return new Vec2<T>(T.Zero, T.One);
+                case '<':
+                    return new Vec2<T>(-T.One, T.Zero);
+                default:
+                    throw new Exception("Facing must be one of: [^>v<]");
+
+            }
+        }
+
 
         public void AddFacing(int facing, T amount)
         {
