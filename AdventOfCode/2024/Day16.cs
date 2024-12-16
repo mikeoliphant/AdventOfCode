@@ -10,6 +10,8 @@
         void ReadData()
         {
             grid = new Grid<char>().CreateDataFromRows(File.ReadLines(DataFile));
+
+            bool blah = (1, 0) == new IntVec2(1, 0);
         }
 
         IEnumerable<KeyValuePair<State, float>> GetNeighbors(State state)

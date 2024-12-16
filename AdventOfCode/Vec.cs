@@ -80,9 +80,44 @@ namespace AdventOfCode
             return (obj is Vec2<T>) && this.Equals(((Vec2<T>)obj));
         }
 
+        public bool Equals((T X, T Y) other)
+        {
+            return (X == other.X) && (Y == other.Y);
+        }
+
         public bool Equals(Vec2<T> other)
         {
             return (X == other.X) && (Y == other.Y);
+        }
+
+        public static implicit operator (T, T)(Vec2<T> vec)
+        {
+            return (vec.X, vec.Y);
+        }
+
+        public static implicit operator Vec2<T>((int X, int Y) tuple)
+        {
+            return new Vec2<T>(tuple);
+        }
+
+        public static bool operator ==((T X, T Y) v1, Vec2<T> v2)
+        {
+            return v2.Equals(v1);
+        }
+
+        public static bool operator !=((T X, T Y) v1, Vec2<T> v2)
+        {
+            return !v2.Equals(v1);
+        }
+
+        public static bool operator ==(Vec2<T> v1, (T X, T Y) v2)
+        {
+            return v2.Equals(v1);
+        }
+
+        public static bool operator !=(Vec2<T> v1, (T X, T Y) v2)
+        {
+            return !v2.Equals(v1);
         }
 
         public static bool operator ==(Vec2<T> v1, Vec2<T> v2)
