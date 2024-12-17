@@ -48,7 +48,7 @@
         {
         }
 
-        public void Reset()
+        public virtual void Reset()
         {
             InstructionPointer = 0;
             Registers.Clear();
@@ -87,6 +87,11 @@
             }
 
             return int.Parse(registerOrVal);
+        }
+
+        public virtual string GetRegisterDisplayValue(long reg)
+        {
+            return reg.ToString();
         }
 
         public void RunDebug()
@@ -138,7 +143,7 @@
 
                     foreach (var register in Registers)
                     {
-                        Console.Write("[" + register.Key + "] " + register.Value);
+                        Console.Write("[" + register.Key + "] " + GetRegisterDisplayValue(register.Value));
 
                         if (LastWrittenRegister == register.Key)
                             Console.Write(" < ");

@@ -64,6 +64,16 @@ namespace AdventOfCode
             return input.Split(delimeter).ToFloats();
         }
 
+        public static IEnumerable<T[]> InGroupsOf<T>(this IEnumerable<T> parts,
+                                             int groupSize)
+        {
+            IEnumerable<T> partsLeft = parts;
+            while (partsLeft.Count() >= groupSize)
+            {
+                yield return partsLeft.Take(groupSize).ToArray<T>();
+                partsLeft = partsLeft.Skip(groupSize);
+            }
+        }
         public static IEnumerable<(string, string)> ParseTuples(this string input, char listDelimeter, char tupleDelimeter)
         {
             foreach (string tuple in input.Split(listDelimeter))
