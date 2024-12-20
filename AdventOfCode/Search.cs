@@ -239,4 +239,43 @@
             return true;
         }
     }
+
+    public class GridSearch<T>
+    {
+        public T[] WallValues { get; set; }
+
+        Grid<T> grid = null;
+
+        public GridSearch(Grid<T> grid)
+        {
+            this.grid = grid;
+        }
+
+        IEnumerable<(int X, int Y)> GetNeighbors((int X, int Y) pos)
+        {
+            return grid.ValidNeighbors(pos.X, pos.Y).Where(n => !WallValues.Contains(grid[n]));
+        }
+
+        public List<(int X, int Y)> GetShortestPath((int X, int Y) start, (int X, int Y) end)
+        {
+            DijkstraSearch<(int X, int Y)> search = new DijkstraSearch<(int X, int Y)>(GetNeighbors);   
+
+            return search.GetShortestPath(start, end).Path;
+        }
+
+        public List<(int X, int Y)> GetShortestPath(T start, T end)
+        {
+            DijkstraSearch<(int X, int Y)> search = new DijkstraSearch<(int X, int Y)>(GetNeighbors);
+
+            return search.GetShortestPath(grid.FindValue(start).First(), grid.FindValue(end).First()).Path;
+        }
+
+        public void DrawPath(List<(int X, int Y)> path, T value)
+        {
+            foreach (var pos in path)
+            {
+                grid[pos] = value;
+            }
+        }
+    }
 }
