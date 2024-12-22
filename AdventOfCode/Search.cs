@@ -244,7 +244,7 @@
     {
         public T[] WallValues { get; set; }
 
-        Grid<T> grid = null;
+        protected Grid<T> grid = null;
 
         public GridSearch(Grid<T> grid)
         {
@@ -268,6 +268,13 @@
             DijkstraSearch<(int X, int Y)> search = new DijkstraSearch<(int X, int Y)>(GetNeighbors);
 
             return search.GetShortestPath(grid.FindValue(start).First(), grid.FindValue(end).First()).Path;
+        }
+
+        public List<(int X, int Y)> GetShortestPath((int X, int Y) start, Func<(int X, int Y), bool> endCheck)
+        {
+            DijkstraSearch<(int X, int Y)> search = new DijkstraSearch<(int X, int Y)>(GetNeighbors);
+
+            return search.GetShortestPath(start, endCheck).Path;
         }
 
         public void DrawPath(List<(int X, int Y)> path, T value)
