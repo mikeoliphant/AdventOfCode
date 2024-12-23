@@ -61,19 +61,6 @@
             return withT.Count;
         }
 
-        bool ContainsGroup(IEnumerable<IEnumerable<string>> groups, IEnumerable<string> group)
-        {
-            foreach (var g in groups)
-            {
-                if (g.SequenceEqual(group))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         IEnumerable<List<string>> ExpandGroups(IEnumerable<IEnumerable<string>> currentGroups)
         {
             foreach (var g in currentGroups)
