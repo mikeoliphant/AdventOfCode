@@ -39,6 +39,8 @@
         Dictionary<(char, char), string> cache = new();
         Dictionary<(char, char), List<(char, char)>> transitions = new();
 
+        Random random = new();
+
         IEnumerable<string> GetPaths(Grid<char> pad, char start, char end)
         {
             var startPos = (IntVec2)pad.FindValue(start).First();
@@ -60,24 +62,56 @@
                     yield return new string(xChar, abs.X) + "A";
                 else
                 {
-                    if (pad[startPos.X, startPos.Y + diff.Y] != ' ')
-                        yield return new string(yChar, abs.Y) + new string(xChar, abs.X) + "A";
+                    if (random.NextDouble() < 0.5)
+                    {
+                        if (pad[startPos.X, startPos.Y + diff.Y] != ' ')
+                            yield return new string(yChar, abs.Y) + new string(xChar, abs.X) + "A";
 
-                    if (pad[startPos.X + diff.X, startPos.Y] != ' ')
-                        yield return new string(xChar, abs.X) + new string(yChar, abs.Y) + "A";
+                        if (pad[startPos.X + diff.X, startPos.Y] != ' ')
+                            yield return new string(xChar, abs.X) + new string(yChar, abs.Y) + "A";
+                    }
+                    else
+                    {
+                        if (pad[startPos.X + diff.X, startPos.Y] != ' ')
+                            yield return new string(xChar, abs.X) + new string(yChar, abs.Y) + "A";
+
+                        if (pad[startPos.X, startPos.Y + diff.Y] != ' ')
+                            yield return new string(yChar, abs.Y) + new string(xChar, abs.X) + "A";
+                    }
                 }
             }
         }
 
+        int ManhattanDistance(string code)
+        {
+            char lastChar = 'A';
+
+            int dist = 0;
+
+            foreach (char c in code)
+            {
+                dist += ((IntVec2)dPad.FindValue(lastChar).First()).ManhattanDistance(dPad.FindValue(c).First());
+
+                lastChar = c;
+            }
+
+            return dist;
+        }
+
         void CacheTransitions()
         {
+            cache.Clear();
+            transitions.Clear();
+
             var chars = dPad.GetAllValues().Where(c => c != ' ');
 
             foreach (char c in chars)
             {
                 foreach (char c2 in chars)
                 {
-                    cache[(c, c2)] = GetPaths(dPad, c, c2).First();
+                    var paths = GetPaths(dPad, c, c2);
+
+                    cache[(c, c2)] = paths.First();
 
                     var trans = new List<(char, char)>();
 
@@ -218,28 +252,25 @@
         {
             //long len = GetShortestPath("179A", 2);
 
-            long complexity = 0;
+            HashSet<long> comps = new();
 
-            CacheTransitions();
-
-            foreach (string code in File.ReadLines(DataFile))
+            for (int i = 0; i < 1000; i++)
             {
-                long length = GetShortestPathLength(code, 25);
+                long complexity = 0;
 
-                complexity += (length * long.Parse(code.Substring(0, 3)));
+                CacheTransitions();
+
+                foreach (string code in File.ReadLines(DataFile))
+                {
+                    long length = GetShortestPathLength(code, 25);
+
+                    complexity += (length * long.Parse(code.Substring(0, 3)));
+                }
+
+                comps.Add(complexity);
             }
 
-            // (A) <
-            // (A)v << A = (A)v(v) < (<) < (<)A
-            // (A)v<A<A A>>^A = (A)v(v) < (<)A(A) < (<)A(A)A(A) > (>) > (> ^)(^)A
-
-            // 283135569285164 too high
-            // 175396398527088 too low
-
-            // 454239026963182
-            // 281309974290720
-
-            return complexity;
+            return comps.Min();
         }
     }
 }
