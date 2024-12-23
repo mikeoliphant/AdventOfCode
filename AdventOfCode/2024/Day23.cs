@@ -74,10 +74,8 @@
             return false;
         }
 
-        List<List<string>> ExpandGroups(IEnumerable<IEnumerable<string>> currentGroups)
+        IEnumerable<List<string>> ExpandGroups(IEnumerable<IEnumerable<string>> currentGroups)
         {
-            List<List<string>> newGroups = new List<List<string>>();
-
             foreach (var g in currentGroups)
             {
                 foreach (var other in computers)
@@ -101,26 +99,50 @@
 
                             newList.Sort();
 
-                            if (!ContainsGroup(newGroups, newList))
-                            {
-                                newGroups.Add(newList);
-                            }
+                            yield return newList;
                         }
                     }
                 }
             }
-
-            return newGroups;
         }
 
-        bool CanLinkT(IEnumerable<string> group)
+        int CompareLists(List<string> a, List<string> b)
         {
-            if (group.Where(c => c.StartsWith('t')).Any())
+            for (int i = 0; i < a.Count; i++)
             {
-                return true;
+                int c = a[i].CompareTo(b[i]);
+
+                if (c != 0)
+                {
+                    return c;
+                }
             }
 
-            return group.Where(c => connections[c].Where(ct => ct.StartsWith('t')).Any()).Any();
+            return 0;
+        }
+
+        IEnumerable<List<string>> RemoveDupes(List<List<string>> groups)
+        {
+            groups.Sort(CompareLists);
+
+            List<string>? last = null;
+
+            foreach (var g in groups)
+            {
+                if (last != null)
+                {
+                    if (!g.SequenceEqual(last))
+                    {
+                        yield return g;
+                    }
+                }
+                else
+                {
+                    yield return g;
+                }
+
+                last = g;
+            }
         }
 
         public override long Compute2()
@@ -133,7 +155,7 @@
 
             do
             {
-                var newGroups = ExpandGroups(groups).ToList();
+                var newGroups = RemoveDupes(ExpandGroups(groups).ToList()).ToList();
 
                 if (newGroups.Count == 0)
                 {
