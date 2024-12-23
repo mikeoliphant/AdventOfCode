@@ -4,6 +4,7 @@
     using StackState = (IEnumerable<(int X, int Y)> Pos, string ToType);
     using System.DirectoryServices.ActiveDirectory;
     using System.IO;
+    using System.Collections.Frozen;
 
     internal class Day21 : Day
     {
@@ -62,22 +63,11 @@
                     yield return new string(xChar, abs.X) + "A";
                 else
                 {
-                    if (random.NextDouble() < 0.5)
-                    {
-                        if (pad[startPos.X, startPos.Y + diff.Y] != ' ')
-                            yield return new string(yChar, abs.Y) + new string(xChar, abs.X) + "A";
+                    if (pad[startPos.X, startPos.Y + diff.Y] != ' ')
+                        yield return new string(yChar, abs.Y) + new string(xChar, abs.X) + "A";
 
-                        if (pad[startPos.X + diff.X, startPos.Y] != ' ')
-                            yield return new string(xChar, abs.X) + new string(yChar, abs.Y) + "A";
-                    }
-                    else
-                    {
-                        if (pad[startPos.X + diff.X, startPos.Y] != ' ')
-                            yield return new string(xChar, abs.X) + new string(yChar, abs.Y) + "A";
-
-                        if (pad[startPos.X, startPos.Y + diff.Y] != ' ')
-                            yield return new string(yChar, abs.Y) + new string(xChar, abs.X) + "A";
-                    }
+                    if (pad[startPos.X + diff.X, startPos.Y] != ' ')
+                        yield return new string(xChar, abs.X) + new string(yChar, abs.Y) + "A";
                 }
             }
         }
@@ -111,7 +101,7 @@
                 {
                     var paths = GetPaths(dPad, c, c2);
 
-                    cache[(c, c2)] = paths.First();
+                    cache[(c, c2)] = paths.Skip(random.Next(paths.Count())).First();    // Randomize because I'm too lazy to just test all permutations
 
                     var trans = new List<(char, char)>();
 
