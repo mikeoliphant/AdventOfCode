@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Eventing.Reader;
+﻿using System.Configuration;
+using System.Diagnostics.Eventing.Reader;
 
 namespace AdventOfCode._2024
 {
@@ -8,6 +9,8 @@ namespace AdventOfCode._2024
         static List<Gate> gates = new();
         static Dictionary<string, bool> wireValues = new();
         static List<(string, bool)> initialWireValues = new();
+        static Dictionary<string, Gate> gatesByWire;
+
 
         static List<Gate> GetConnections(string wire)
         {
@@ -50,7 +53,7 @@ namespace AdventOfCode._2024
             {
                 inputs[haveInputs++] = input;
 
-                if (haveInputs == 2)
+                if ((haveInputs == 2) || (OpCode == EOpCode.OR))
                 {
                     GenerateOutput();
                 }
@@ -61,7 +64,7 @@ namespace AdventOfCode._2024
                 haveInputs = 0;
             }
 
-            protected virtual void GenerateOutput()
+            protected void GenerateOutput()
             {
                 bool output = false;
 
@@ -71,6 +74,10 @@ namespace AdventOfCode._2024
                         output = inputs[0] && inputs[1];
                         break;
                     case EOpCode.OR:
+                        if ((haveInputs == 2) && inputs[0]) // Already fired
+                            return;
+                        if ((haveInputs == 1) && !inputs[0])    // Need a second
+                            return;
                         output = inputs[0] || inputs[1];
                         break;
                     case EOpCode.XOR:
@@ -113,6 +120,8 @@ namespace AdventOfCode._2024
 
                 initialWireValues.Add((wireVal[0], int.Parse(wireVal[1]) == 1));
             }
+
+            gatesByWire = gates.ToDictionary(g => g.OutputWire, g => g);
         }
 
         public override long Compute()
@@ -141,23 +150,35 @@ namespace AdventOfCode._2024
             }
         }
 
-        long Run(long num1, long num2)
+        long Run(long num1, long num2, int numBits)
         {
             Reset();
 
-            for (int x = 44; x >= 0; x--)
+            for (int x = 0; x < numBits; x++)
             {
-                SetWire("x" + x.ToString("00"), (num1 & (1 << x)) != 0); 
+                SetWire("x" + x.ToString("00"), (num1 & (1L << x)) != 0); 
             }
 
-            for (int y = 44; y >= 0; y--)
+            for (int y = 0; y < numBits; y++)
             {
-                SetWire("y" + y.ToString("00"), (num1 & (1 << y)) != 0);
+                SetWire("y" + y.ToString("00"), (num2 & (1L << y)) != 0);
             }
 
-            var bits = new string(wireValues.Where(w => w.Key.StartsWith('z')).OrderByDescending(w => w.Key).Select(w => w.Value ? '1' : '0').ToArray());
+            long output = 0;
 
-            return Convert.ToInt64(bits, 2);
+            for (int z = 0; z < numBits; z++)
+            {
+                string wire = "z" + z.ToString("00");
+
+                if (wireValues[wire])
+                    output += (1L << z);
+            }
+
+            //var bits = new string(wireValues.Where(w => w.Key.StartsWith('z')).OrderByDescending(w => w.Key).Select(w => w.Value ? '1' : '0').ToArray());
+
+            //return Convert.ToInt64(bits, 2);
+
+            return output;
         }
 
         long Factorial(long value)
@@ -198,28 +219,26 @@ namespace AdventOfCode._2024
 
         Random random = new Random();
 
-        int TestBits()
+        int TestBits(int bitsToTest)
         {
-            long correctMask = (1L << 46) - 1;
-
-            int num = Convert.ToString(correctMask, 2).Where(c => c == '1').Count();
+            long correctMask = (1L << bitsToTest) - 1;
 
             for (int i = 0; i < 100; i++)
             {
-                long num1 = (long)(random.NextDouble() * (1L << 45));
-                long num2 = (long)(random.NextDouble() * (1L << 45));
+                long num1 = (long)(random.NextDouble() * (1L << bitsToTest));
+                long num2 = (long)(random.NextDouble() * (1L << bitsToTest));
 
-                long calculated = Run(num1, num2);
+                long calculated = Run(num1, num2, bitsToTest);
 
-                Console.WriteLine(Convert.ToString(calculated, 2).PadLeft(46, '0'));
-                Console.WriteLine(Convert.ToString(num1 + num2, 2).PadLeft(46, '0'));
+                long sum = num1 + num2;
 
-                long wrong = (num1 + num2) & calculated;
-
-                Console.WriteLine(Convert.ToString(wrong, 2).PadLeft(46, '0'));
-                Console.WriteLine();
-
-                correctMask &= ~wrong;
+                for (int bit = 0; bit < bitsToTest; bit++)
+                {
+                    if ((calculated & (1L << bit)) != (sum & (1L << bit)))
+                    {
+                        correctMask &= ~(1L << bit);
+                    }
+                }
 
                 if (correctMask == 0)
                     return 0;
@@ -228,8 +247,11 @@ namespace AdventOfCode._2024
             return Convert.ToString(correctMask, 2).Where(c => c == '1').Count();
         }
 
-        void Swap2(Gate gate1, Gate gate2)
+        void Swap2(string wire1, string wire2)
         {
+            Gate gate1 = gatesByWire[wire1];
+            Gate gate2 = gatesByWire[wire2];
+
             string tmp = gate1.OutputWire;
             gate1.OutputWire = gate2.OutputWire;
             gate2.OutputWire = tmp;
@@ -239,50 +261,79 @@ namespace AdventOfCode._2024
         {
             ReadData();
 
-            Dictionary<string, int> counts = new();
+            HashSet<string> goodWires = new();
 
-            for (int i = 0; i < 45; i++)
+            List<(string, string)> swapped = new();
+
+            for (int bits = 1; bits < 46; bits++)
             {
-                var trace = Trace("x" + i.ToString("00"));
+                int correct = TestBits(bits);
 
-                foreach (string wire in trace)
+                HashSet<string> usedWires = wireValues.Keys.Where(w => !w.StartsWith('x') && !w.StartsWith('y')).Where(w => !goodWires.Contains(w)).ToHashSet();
+
+                if (correct == bits)
                 {
-                    if (!counts.ContainsKey(wire))
-                    {
-                        counts[wire] = 1;
-                    }
-                    else
-                    {
-                        counts[wire]++;
-                    }
                 }
+                else
+                {
+                    var wires = usedWires.ToList();
+                    //var wires = gates.Select(g => g.OutputWire).Where(w => !goodWires.Contains(w)).ToList();
+                    (string, string)? toSwap = null;
+
+                    for (int w1 = 0; w1 < wires.Count; w1++)
+                    {
+                        for (int w2 = w1 + 1; w2 < wires.Count; w2++)
+                        {
+                            string wire1 = wires[w1];
+                            string wire2 = wires[w2];
+
+                            if (wire1 != wire2)
+                            {
+                                Swap2(wire1, wire2);
+
+                                try
+                                {
+                                    correct = TestBits(bits);
+
+                                    if (correct == bits)
+                                    {
+                                        if (toSwap != null)
+                                        {
+
+                                        }
+
+                                        toSwap = (wire1, wire2);
+                                    }
+                                }
+                                catch { }
+
+                                Swap2(wire1, wire2);
+                            }
+                        }
+                    }
+
+                    if (toSwap == null)
+                        throw new Exception();
+
+                    Swap2(toSwap.Value.Item1, toSwap.Value.Item2);
+                    swapped.Add(toSwap.Value);
+               }
+
+                foreach (string good in usedWires)
+                    goodWires.Add(good);
             }
 
-            var gatesByWire = gates.ToDictionary(g => g.OutputWire, g => g);
+            var allswapped = new List<string>();
 
-            var sorted = counts.OrderByDescending(c => c.Value).Select(c => (c.Key, c.Value)).ToList();
-
-            Swap2(gatesByWire["fps"], gatesByWire["mvw"]);
-            Swap2(gatesByWire["jqp"], gatesByWire["jfb"]);
-
-            var path = Trace("x00").ToList();
-
-            int bits = TestBits();
-
-            for (int g1 = 0; g1 < sorted.Count; g1++)
+            foreach (var swap in swapped)
             {
-                for (int g2 = g1 + 1; g2 < sorted.Count; g2++)
-                {
-                    Swap2(gatesByWire[sorted[g1].Key], gatesByWire[sorted[g2].Key]);
-
-                    if (TestBits() > 0)
-                    {
-
-                    }
-
-                    Swap2(gatesByWire[sorted[g1].Key], gatesByWire[sorted[g2].Key]);
-                }
+                allswapped.Add(swap.Item1);
+                allswapped.Add(swap.Item2);
             }
+
+            allswapped.Sort();
+
+            string result = string.Join(',', allswapped);
 
             return 0;
         }
