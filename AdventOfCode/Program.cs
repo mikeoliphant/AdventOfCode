@@ -14,7 +14,11 @@ namespace AdventOfCode
     {
         static void Main(string[] args)
         {
-            long result = new AdventOfCode._2025.Day1().Compute2();
+            long result = new AdventOfCode._2025.Day2().Compute2();
+
+            Console.WriteLine("Result is: " + result);
+
+            Console.ReadLine();
         }
     }
 }
