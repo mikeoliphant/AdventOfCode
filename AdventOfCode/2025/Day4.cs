@@ -18,31 +18,16 @@ namespace AdventOfCode._2025
             return false;
         }
 
+        IEnumerable<(int X, int)> AvailableToRemove(Grid<char> grid)
+        {
+            return grid.GetAll().Where(c => CanRemove(grid, c.X, c.Y));
+        }
+
         public override long Compute()
         {
             var grid = new Grid<char>().CreateDataFromRows(File.ReadLines(DataFile));
 
-            long numAccessible = 0;
-
-            foreach (var cell in grid.GetAll())
-            {
-                if (CanRemove(grid, cell.X, cell.Y))
-                    numAccessible++;
-            }
-
-            grid.PrintToConsole();
-
-            return numAccessible;
-        }
-
-        (int X, int Y)? ToRemove(Grid<char> grid)
-        {
-            var available = grid.GetAll().Where(c => CanRemove(grid, c.X, c.Y));
-
-            if (!available.Any())
-                return null;
-
-            return available.First();
+            return AvailableToRemove(grid).Count();
         }
 
         public override long Compute2()
@@ -53,16 +38,21 @@ namespace AdventOfCode._2025
 
             do
             {
-                var toRemove = ToRemove(grid);
+                var toRemove = AvailableToRemove(grid).ToList();
 
-                if (toRemove == null)
+                if (!toRemove.Any())
                     break;
 
-                grid[toRemove.Value] = '.';
+                numRemoved += toRemove.Count();
 
-                numRemoved++;
+                foreach (var cell in toRemove)
+                {
+                    grid[cell] = '.';
+                }
             }
             while (true);
+
+            grid.PrintToConsole();
 
             return numRemoved;
         }
