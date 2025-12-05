@@ -24,6 +24,18 @@ namespace AdventOfCode
             return (Max - Min) + 1;
         }
 
+        public static Range FromString(string str)
+        {
+            return FromString(str, "-");
+        }
+
+        public static Range FromString(string str, string split)
+        {
+            var vals = str.Split(split);
+
+            return new Range(long.Parse(vals[0]), long.Parse(vals[1]));
+        }
+
         public Range(long min, long max)
         {
             this.Min = min;
@@ -43,6 +55,12 @@ namespace AdventOfCode
         public Range Above(long splitVal)
         {
             return new Range(splitVal + 1, Max);
+        }
+
+        public bool Intersects(Range otherRange)
+        {
+            return otherRange.Contains(Min) || otherRange.Contains(Max);
+
         }
 
         public Range Intersect(Range otherRange)
