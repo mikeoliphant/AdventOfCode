@@ -49,7 +49,7 @@ namespace AdventOfCode._2025
             return numAvailable;
         }
 
-        public override long Compute2()
+        public long Compute2Old()
         {
             ReadData();
 
@@ -82,19 +82,38 @@ namespace AdventOfCode._2025
                 finalRanges.AddRange(set);
             }
 
-            for (int r1 = 0; r1 < finalRanges.Count; r1++)
-            {
-                for (int r2 = r1 + 1; r2 < finalRanges.Count; r2++)
-                {
-                    if (finalRanges[r1].Intersects(finalRanges[r2]))
-                    {
+            long tot = finalRanges.Select(r => r.Size()).Sum();
 
+            return tot;
+        }
+
+        public override long Compute2()
+        {
+            ReadData();
+
+            var sorted = fresh.OrderBy(f => f.Min);
+
+            long tot = 0;
+            long max = 0;
+
+            foreach (Range r in sorted)
+            {
+                if (r.Min > max)
+                {
+                    tot += r.Size();
+
+                    max = r.Max;
+                }
+                else
+                {
+                    if (r.Max > max)
+                    {
+                        tot += r.Max - max;
+
+                        max = r.Max;
                     }
                 }
             }
-
-
-            long tot = finalRanges.Select(r => r.Size()).Sum();
 
             return tot;
         }

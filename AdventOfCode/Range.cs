@@ -68,6 +68,12 @@ namespace AdventOfCode
             return new Range(Math.Max(Min, otherRange.Min), Math.Min(Max, otherRange.Max));
         }
 
+        // Assumes you have alread check intersect
+        public Range Union(Range otherRange)
+        {
+            return new Range(Math.Min(Min, otherRange.Min), Math.Max(Max, otherRange.Max));
+        }
+
         public Range Subtract(Range otherRange)
         {
             if (otherRange.Min > Min)
