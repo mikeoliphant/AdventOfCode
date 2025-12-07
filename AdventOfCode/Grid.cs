@@ -1,4 +1,4 @@
-﻿
+﻿global using GridPos = (int X, int Y);
 
 namespace AdventOfCode
 {
