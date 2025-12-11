@@ -285,4 +285,19 @@
             }
         }
     }
+
+    public class EquatableArray<T> : IEquatable<EquatableArray<T>> where T : IEquatable<T>
+    {
+        public T[] Array { get;}
+
+        public EquatableArray(T[] array)
+        {
+            this.Array = array;
+        }
+
+        public bool Equals(EquatableArray<T>? other)
+        {
+            return Array.SequenceEqual(other.Array);
+        }
+    }
 }

@@ -9,7 +9,7 @@ namespace AdventOfCode
 
         public ICollection<T> Nodes { get { return connections.Keys; } }
 
-        void AddConnection(T a, T b)
+        public void Connect(T a, T b)
         {
             if (!connections.ContainsKey(a))
             {
@@ -19,15 +19,25 @@ namespace AdventOfCode
             connections[a].Add(b);
         }
 
-        public void Connect(T a, T b)
+        public void ConnectBothWays(T a, T b)
         {
-            AddConnection(a, b);
-            AddConnection(b, a);
+            Connect(a, b);
+            Connect(b, a);
         }
 
         public bool IsConnectedTo(T a, T b)
         {
             return connections[a].Contains(b);
+        }
+
+        public HashSet<T> GetConnectionsFrom(T a)
+        {
+            if (!connections.ContainsKey(a))
+            {
+                connections[a] = new HashSet<T>();
+            }
+
+            return connections[a];
         }
 
         int CompareLists(List<T> a, List<T> b)

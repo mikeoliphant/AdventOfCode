@@ -12,6 +12,17 @@
             for (int i = 0; i < Math.Ceiling(source.Count / (Double)size); i++)
                 yield return new List<T>(source.Skip(size * i).Take(size));
         }
+
+        public static IEnumerable<(int I1, int I2)> GetIndexPairs(int count)
+        {
+            for (int i1 = 0; i1 < count; i1++)
+            {
+                for (int i2 = i1 + 1; i2 < count; i2++)
+                {
+                    yield return (i1, i2);
+                }
+            }
+        }
     }
 
     public static class PermutationHelper<T>

@@ -8,7 +8,7 @@
         {
             foreach (string[] pair in File.ReadLines(DataFile).Select(p => p.Split('-')))
             {
-                graph.Connect(pair[0], pair[1]);
+                graph.ConnectBothWays(pair[0], pair[1]);
             }
         }
 

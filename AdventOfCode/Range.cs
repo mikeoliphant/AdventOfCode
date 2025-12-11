@@ -106,5 +106,10 @@ namespace AdventOfCode
         {
             return value >= Min && value <= Max;
         }
+
+        public bool ContainsNonInclusive(long value)
+        {
+            return value > Min && value < Max;
+        }
     }
 }
